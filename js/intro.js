@@ -1,20 +1,20 @@
 var stage;
 var keys = {
-    rkd:false,
-    lkd:false,
-    ukd:false,
-    dkd:false
+    rkd: false,
+    lkd: false,
+    ukd: false,
+    dkd: false
 };
-var i=0;
+var i = 0;
 var gameLoss = false;
 var player;
-var enemyBlock ;
+var enemyBlock;
 /*var player = new Object();
-player.width = 20;
-player.height = 40;
-var enemyBlock = new Object();
-enemyBlock.width = 20;
-enemyBlock.heigh = 40;*/
+ player.width = 20;
+ player.height = 40;
+ var enemyBlock = new Object();
+ enemyBlock.width = 20;
+ enemyBlock.heigh = 40;*/
 var speed = 3;
 var speedCurrent;
 var jumpTemp = 0;
@@ -22,6 +22,9 @@ var jumpSpeed = 25;
 var isJumping = false;
 var mustTouchGround = false;
 var enemySpeed = 6;
+var score = 0;
+var scoreText;
+var collideCheck = false;
 
 var goRight = function () {
     player.x += speedCurrent;
@@ -29,100 +32,93 @@ var goRight = function () {
 var goLeft = function () {
     player.x -= speedCurrent;
 };
-function fingerDown(e){
-   /* console.log(e.keyCode);*/
-    if(e.keyCode === 68 ){
-        keys.rkd=true;
+function fingerDown(e) {
+     console.log(e.keyCode);
+    if (e.keyCode === 68) {
+        keys.rkd = true;
     }
-    if(e.keyCode === 87 ){
-        keys.ukd=true;
+    if (e.keyCode === 87) {
+        keys.ukd = true;
     }
-    if(e.keyCode === 65 ){
-        keys.lkd=true;
+    if (e.keyCode === 65) {
+        keys.lkd = true;
     }
-    if(e.keyCode === 83 ){
-        keys.dkd=true;
+    if (e.keyCode === 83) {
+        keys.dkd = true;
     }
-
+    if (e.keyCode === 49) {
+        collideCheck = true;
+    }
 
 }
 
-function fingerUp(e){
-/*    console.log(e.keyCode);*/
-    if(e.keyCode === 68 ){
-        keys.rkd=false;
+function fingerUp(e) {
+        console.log(e.keyCode);
+    if (e.keyCode === 68) {
+        keys.rkd = false;
     }
-    if(e.keyCode === 87 ){
-        keys.ukd=false;
+    if (e.keyCode === 87) {
+        keys.ukd = false;
     }
-    if(e.keyCode === 65 ){
-        keys.lkd=false;
+    if (e.keyCode === 65) {
+        keys.lkd = false;
     }
-    if(e.keyCode === 83 ){
-        keys.dkd=false;
+    if (e.keyCode === 83) {
+        keys.dkd = false;
     }
-
+    if (e.keyCode === 49) {
+        collideCheck = false;
+    }
 
 }
 
-var charJump = function(){
+var charJump = function () {
 
 
+    var factor = 0.2;
+    if (isJumping) {
+        player.y -= jumpTemp;
+        jumpTemp = (1 - factor) * jumpTemp;
+
+        if (jumpTemp <= 1) {
+            isJumping = false;
+        }
+    }
+    else if (mustTouchGround) {
+        player.y += jumpTemp;
+        jumpTemp = (1 + factor) * jumpTemp;
+    }
 
 
-
-            var factor = 0.2;
-            if(isJumping){
-                player.y -= jumpTemp;
-                jumpTemp = (1 - factor) * jumpTemp ;
-
-                if(jumpTemp <= 1)
-                {
-                    isJumping = false;
-                }
-            }
-    else if(mustTouchGround)
-            {
-                player.y += jumpTemp;
-                jumpTemp = (1 + factor) * jumpTemp;
-            }
+    //if((player.y)<100){
+    //    console.log('stop');
+    //    jumpSpeed=0;
+    //}
+    //else{}
+    //console.log(jumpTemp);
 
 
-            //if((player.y)<100){
-            //    console.log('stop');
-            //    jumpSpeed=0;
-            //}
-            //else{}
-            //console.log(jumpTemp);
+};
 
 
-
-
-
-
-    };
-
-
-function hitTest(rect1,rect2) {
-console.log (" rect1 x = " + rect1.x + " rect 2 .x " + rect2.x + " rect2 width  " + rect2.width + " rect2 height " + rect2.height)
-    if ( rect1.x >= rect2.x + rect2.width
+function hitTest(rect1, rect2) {
+  /*  console.log(" rect1 x = " + rect1.x + " rect 2 .x " + rect2.x + " rect2 width  " + rect2.width + " rect2 height " + rect2.height)*/
+    if (rect1.x >= rect2.x + rect2.width
 
         || rect1.x + rect1.width <= rect2.x
 
         || rect1.y >= rect2.y + rect2.height
 
-        || rect1.y + rect1.height <= rect2.y )
+        || rect1.y + rect1.height <= rect2.y) {
 
-    {
-
-console.log("nothit");
+        console.log("nothit");
         return false;
 
     }
 
-console.log("HIT");
-    if( gameLoss == false) {
-    alert("You lost this easy game, shame on you!");
+    console.log("HIT");
+    if (gameLoss == false) {
+     /*   alert("You lost this easy game, shame on you!");*/
         gameLoss = true;
     }
     return true;
@@ -130,7 +126,7 @@ console.log("HIT");
 }
 
 function playerMove(directionPath) {
-    for (var i = 1; i <=2; i++) {
+    for (var i = 1; i <= 2; i++) {
         (function () {
             setTimeout(function () {
                 speedCurrent = speedCurrent / 2;
@@ -144,37 +140,37 @@ function playerMove(directionPath) {
     }
 }
 
-function movePlayer(){
-    if(keys.rkd){
+function movePlayer() {
+    if (keys.rkd) {
         speedCurrent = speed;
         playerMove(goRight);
         player.x += speed;
     }
-    if(keys.lkd){
+    if (keys.lkd) {
         speedCurrent = speed;
         playerMove(goLeft);
         player.x -= speed;
     }
-    if((keys.ukd)&&(isJumping==false)){
+    if ((keys.ukd) && (isJumping == false)) {
 
 
-if(mustTouchGround){
-    return;
-}
+        if (mustTouchGround) {
+            return;
+        }
         console.log("jump");
         console.log(player.y);
         isJumping = true;
-        jumpTemp= jumpSpeed;
+        jumpTemp = jumpSpeed;
         mustTouchGround = true;
     }
 }
 
-function collider(){
-    hitTest(enemyBlock,player);
+function collide() {
+    hitTest(enemyBlock, player);
 
 }
-function moveEnemy(){
-    enemyBlock.x = enemyBlock.x -enemySpeed;
+function moveEnemy() {
+    enemyBlock.x = enemyBlock.x - enemySpeed;
     if (enemyBlock.x < 0 - enemyBlock.width) {
         enemyBlock.x = 800;
     }
@@ -194,14 +190,20 @@ function initialize() {
     player.width = 20;
     player.height = 40;
 
+    scoreText = new createjs.Text('Score : ', "30px Courier" , "#FFF");
+
+
     enemyBlock = new createjs.Shape();
     enemyBlock.graphics.beginFill('#FFF');
-    enemyBlock.graphics.drawRect(0,0,20,40);
+    enemyBlock.graphics.drawRect(0, 0, 20, 40);
+    // if checkColider = true ) {    enemyBlock = new createjs.Bitmap("img/shroom.png") }
     enemyBlock.x = 800;
-    enemyBlock.y= 400;
+    enemyBlock.y = 400;
     enemyBlock.width = 20;
     enemyBlock.height = 40;
 
+
+    stage.addChild(scoreText);
     stage.addChild(enemyBlock);
     stage.addChild(player);
     console.log(player);
@@ -214,16 +216,28 @@ function initialize() {
 
 function tickHappened(e) {
     movePlayer();
-    if(isJumping || mustTouchGround){
+    if (isJumping || mustTouchGround) {
         charJump();
     }
-    if(player.y>=400){
-        mustTouchGround=false;
-        player.y= 400;
+    if (player.y >= 400) {
+        mustTouchGround = false;
+        player.y = 400;
     }
-    collider();
+    if (player.x < 0) {
+        player.x = 0;
+
+    }
+    collide();
     moveEnemy();
+    score++;
+    scoreText.text = "Score : " + score;
 
 
+    if ( collideCheck == true ){
+        console.log("carnacxe");
+
+        enemyBlock.graphics.drawRect(0, 0, 20, 60);
+    }
+    else {}
     stage.update(e);
 }
