@@ -25,6 +25,12 @@ var enemySpeed = 6;
 var score = 0;
 var scoreText;
 var collideCheck = false;
+var ground;
+var ground2;
+var container;
+var sceneMove = 0;
+var scene = 1;
+
 
 var goRight = function () {
     player.x += speedCurrent;
@@ -49,6 +55,10 @@ function fingerDown(e) {
     if (e.keyCode === 49) {
         collideCheck = true;
     }
+    if (e.keyCode === 50) {
+       scene =2;
+    }
+
 
 }
 
@@ -176,11 +186,16 @@ function moveEnemy() {
     }
 }
 
+function groundMove() {
+    ground.x--;
+    ground2.x--;
+}
 
 function initialize() {
     stage = new createjs.Stage("intro");
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', tickHappened);
+
 
     player = new createjs.Shape();
     player.graphics.beginFill("#FFF");
@@ -201,10 +216,18 @@ function initialize() {
     enemyBlock.y = 400;
     enemyBlock.width = 20;
     enemyBlock.height = 40;
+    container = new createjs.Container();
+    ground = new createjs.Bitmap("img/ground.png");
+    ground.x = 0;
+    ground.y= 440;
+    ground2 = new createjs.Bitmap("img/ground.png");
+    ground2.x = 800;
+    ground2.y= 440;
+    container.addChild(ground2, ground, enemyBlock);
 
-
+    stage.addChild(container);
     stage.addChild(scoreText);
-    stage.addChild(enemyBlock);
+
     stage.addChild(player);
     console.log(player);
 
@@ -215,6 +238,7 @@ function initialize() {
 
 
 function tickHappened(e) {
+    console.log(container.x);
     movePlayer();
     if (isJumping || mustTouchGround) {
         charJump();
@@ -227,16 +251,28 @@ function tickHappened(e) {
         player.x = 0;
 
     }
+    if (ground.x < -800) {
+        ground.x = 0;
+    }
+    if (ground2.x < 0) {
+        ground2.x = 800;
+    }
     collide();
     moveEnemy();
     score++;
+
     scoreText.text = "Score : " + score;
 
 
     if ( collideCheck == true ){
         console.log("carnacxe");
 
-        enemyBlock.graphics.drawRect(0, 0, 20, 60);
+        if(( sceneMove ) < 800 * scene ){
+
+            container.x--;
+            sceneMove++;
+        }
+
     }
     else {}
     stage.update(e);
