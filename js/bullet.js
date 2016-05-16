@@ -1,3 +1,6 @@
+/**
+ * Created by Bogdan on 5/16/2016.
+ */
 var stage;
 var keys = {
     rkd: false,
@@ -24,15 +27,17 @@ var mustTouchGround = false;
 var enemySpeed = 6;
 var score = 0;
 var scoreText;
-var sceneChange = false;
+var collideCheck = false;
 var ground;
 var ground2;
 var container;
 var sceneMove = 0;
 var scene = 1;
 var mouseCheck = false;
-var weaponCooldown = 20;
-var weaponDuration = 1;
+var mouseTickCount = 20;
+var currMouseTickCount = 0;
+var bulletId = 0;
+var bulletCounter = 1;
 
 
 var goRight = function () {
@@ -56,7 +61,7 @@ function fingerDown(e) {
         keys.dkd = true;
     }
     if (e.keyCode === 49) {
-        sceneChange = true;
+        collideCheck = true;
     }
     if (e.keyCode === 50) {
         scene = 2;
@@ -80,7 +85,7 @@ function fingerUp(e) {
         keys.dkd = false;
     }
     if (e.keyCode === 49) {
-        sceneChange = false;
+        collideCheck = false;
     }
 
 }
@@ -91,12 +96,46 @@ function mouseDown(event) {
     var y = event.clientY;
     var coords = "X coords: " + x + ", Y coords: " + y;
     console.log(coords);
+    addBullet("black", 10, 2, player.x,player.y, event.x, event.y);
     mouseCheck = true;
 }
-
 function mouseUp() {
     mouseCheck = false;
     console.log("released");
+}
+
+
+
+function bullet(id, color, size, speed, x, y, eX, eY) {
+    this.id = id;
+    this.color = color;
+    this.size = size;
+    this.x = x;
+    this.y = y;
+    this.eX = eX;
+    this.eY = eY;
+    this.velocityX = 1;
+    this.velocityY = 1;
+    this.speed = speed;
+}
+
+
+var bulletList = [];
+
+function addBullet(color, bsize, bspeed, x, y, eX, eY) {
+    bulletList[bulletId] = new bullet(bulletId, color, bsize, bspeed, x, y, eX, eY);
+    bulletId += 1;
+}
+
+
+function updateBullet(bullet, player) {
+    var dx = (bullet.eX - player.x);
+    var dy = (bullet.eY - player.y);
+    var mag = Math.sqrt(dx * dx + dy * dy);
+    bullet.velocityX = (dx / mag) * speed;
+    bullet.velocityY = (dy / mag) * speed;
+    bullet.x += bullet.velocityX;
+    bullet.y += bullet.velocityY;
 }
 
 
@@ -199,7 +238,7 @@ function collide() {
 function moveEnemy() {
     enemyBlock.x = enemyBlock.x - enemySpeed;
     if (enemyBlock.x < 0 - enemyBlock.width) {
-        enemyBlock.x = 780;
+        enemyBlock.x = 800;
     }
 }
 
@@ -211,7 +250,6 @@ function groundMove() {
 function initialize() {
 
     stage = new createjs.Stage("intro");
-
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', tickHappened);
 
@@ -287,34 +325,43 @@ function tickHappened(e) {
     scoreText.text = "Score : " + score;
 
 
-    if (sceneChange == true) {
+    if (collideCheck == true) {
         console.log("carnacxe");
 
         if (( sceneMove ) < 800 * scene) {
 
-            container.x -= 5;
-            sceneMove += 5;
+            container.x--;
+            sceneMove++;
         }
 
     }
-
+    currMouseTickCount = currMouseTickCount % mouseTickCount;
 
     if (mouseCheck) {
-        if (weaponDuration == 0) {
+        if (currMouseTickCount == 0) {
             createBullet();
-
-            weaponDuration = weaponCooldown;
+        }
+        currMouseTickCount++;
+    }
+    $.each(bulletList, function (index, bullet) {
+        updateBullet(bullet, player);
+        bullet2 = new createjs.Shape();
+        bullet2.graphics.beginFill("#FFF");
+        bullet2.graphics.drawRect(bullet.x, bullet.y, bullet.size, bullet.size);
+        console.log(bullet.x + "   "+ bullet.y + "   "+ bullet.size + "   "+ bullet.size);
+        stage.addChild(bullet2);
+        if ( bulletCounter%130 == 1) {
+            console.log("trigger");
+            stage.removeChild(bullet2);
 
         }
-    }
-    weaponDuration--;
-    if (weaponDuration < 0) {
-        weaponDuration = 0;
-    }
 
 
-    /* console.log("weapon dureation " + weaponDuration + " weapon tick count " + weaponCooldown);*/
-    /*
-     console.log("currweaponCooldown = " + currweaponCooldown +" Weapon tick count = " + weaponCooldown + " weapon check is " + weaponCheck + " weapon dureation = " + weaponDuration);*/
+
+
+    });
+    console.log(bulletCounter);
+    bulletCounter ++;
+
     stage.update(e);
 }
