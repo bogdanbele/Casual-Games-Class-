@@ -8,13 +8,14 @@ var keys = {
 var i = 0;
 var gameLoss = false;
 var player;
-var enemyBlock;
-/*var player = new Object();
- player.width = 20;
- player.height = 40;
- var enemyBlock = new Object();
- enemyBlock.width = 20;
- enemyBlock.heigh = 40;*/
+var enemyBlock ={};
+enemyBlock.width = 20;
+enemyBlock.heigh = 40;
+var weaponColide = [];
+weaponColide.x = 0;
+weaponColide.y = 0;
+weaponColide.width = 0;
+weaponColide.height = 0;
 var speed = 3;
 var speedCurrent;
 var jumpTemp = 0;
@@ -33,8 +34,18 @@ var scene = 1;
 var mouseCheck = false;
 var weaponCooldown = 20;
 var weaponDuration = 1;
+var weaponWidh = 50;
+var weaponHeight = 50;
+var attackTimer = 0;
+var attackCheck = false;
+var weaponDamage = 2;
 
-
+function resetWeapon() {
+    weaponColide.x = 0;
+    weaponColide.y = 0;
+    weaponColide.width = 0;
+    weaponColide.height = 0;
+}
 var goRight = function () {
     player.x += speedCurrent;
 };
@@ -142,11 +153,8 @@ function hitTest(rect1, rect2) {
 
     }
 
-    /*   console.log("HIT");*/
-    if (gameLoss == false) {
-        /*   alert("You lost this easy game, shame on you!");*/
-        gameLoss = true;
-    }
+       console.log("HIT");
+
     return true;
 
 }
@@ -193,9 +201,21 @@ function movePlayer() {
 }
 
 function collide() {
-    hitTest(enemyBlock, player);
+    if(hitTest(enemyBlock, player)){}
+    if(hitTest(enemyBlock, weaponColide)){
+        enemyBlock.health-=weaponDamage;
+        console.log(enemyBlock.health);
+        damageEnemy(enemyBlock);
+    }
 
 }
+function damageEnemy(event){
+    if(event.health < 1 ) {
+        container.removeChild(event);
+
+  }
+}
+
 function moveEnemy() {
     enemyBlock.x = enemyBlock.x - enemySpeed;
     if (enemyBlock.x < 0 - enemyBlock.width) {
@@ -227,6 +247,7 @@ function initialize() {
     scoreText = new createjs.Text('Score : ', "30px Courier", "#FFF");
 
 
+
     enemyBlock = new createjs.Shape();
     enemyBlock.graphics.beginFill('#FFF');
     enemyBlock.graphics.drawRect(0, 0, 20, 40);
@@ -235,6 +256,7 @@ function initialize() {
     enemyBlock.y = 400;
     enemyBlock.width = 20;
     enemyBlock.height = 40;
+    enemyBlock.health = 3;
     container = new createjs.Container();
     ground = new createjs.Bitmap("img/ground.png");
     ground.x = 0;
@@ -258,6 +280,10 @@ function initialize() {
 }
 function createBullet() {
     console.log("Bullet fired");
+}
+
+function hide(hide){
+    stage.removeChild(hide);
 }
 
 function tickHappened(e) {
@@ -302,8 +328,19 @@ function tickHappened(e) {
     if (mouseCheck) {
         if (weaponDuration == 0) {
             createBullet();
-
+            weaponColide = new createjs.Shape();
+            weaponColide.graphics.beginFill('#FFF');
+            weaponColide.graphics.drawRect(0, 0, weaponWidh, weaponHeight);
+            stage.addChild(weaponColide);
+            weaponColide.x = player.x + player.width;
+            weaponColide.y = player.y - weaponHeight/2 + player.height/2 ;
+            weaponColide.width = weaponWidh;
+            weaponColide.height = weaponHeight;
+            attackCheck = true;
             weaponDuration = weaponCooldown;
+            weaponColide.alpha = 1;
+
+            /**/
 
         }
     }
@@ -312,7 +349,16 @@ function tickHappened(e) {
         weaponDuration = 0;
     }
 
+if (attackCheck){
+    attackTimer++;
+}
 
+if ( attackTimer == 2 ){
+    attackTimer=0;
+    stage.removeChild(weaponColide);
+    resetWeapon();
+    attackCheck = false;
+}
     /* console.log("weapon dureation " + weaponDuration + " weapon tick count " + weaponCooldown);*/
     /*
      console.log("currweaponCooldown = " + currweaponCooldown +" Weapon tick count = " + weaponCooldown + " weapon check is " + weaponCheck + " weapon dureation = " + weaponDuration);*/
