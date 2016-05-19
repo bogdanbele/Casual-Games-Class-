@@ -42,6 +42,9 @@
     var attackCheck = false;
     var weaponDamage = 2;
     var enemyList = [];
+    var queue;
+    var preloadText;
+    var playerSS;
 }
 
 
@@ -298,12 +301,44 @@ function weaponAttack() {
 
 function initialize() {
     stage = new createjs.Stage("intro");
+    preloadText = new createjs.Text("Loading", "30px Verdana", "#000");
+    preloadText.textBaseline = "middle";
+    preloadText.textAlign = "center";
+    preloadText.x = stage.canvas.width / 2;
+    preloadText.y = stage.canvas.height / 2;
+    stage.addChild(preloadText);
+    preload();
+}
+
+function preload(){
+    queue = new createjs.LoadQueue(true);
+    queue.on("progress", progress);
+    queue.on("complete", startGame);
+
+    queue.loadManifest(
+        [
+          /*  "img/1.jpg", "img/star.png",*/
+            {"id": "playerRun", "src":"js/playerrun.json"}
+        ]
+    );
+}
+
+
+
+function progress(e){
+    var percent = Math.round(e.progress*100);
+    preloadText.text = "Loading: "+percent+"%";
+    stage.update()
+}
+
+function startGame() {
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', tickHappened);
+    stage.removeChild(preloadText);
+    playerSS = new createjs.SpriteSheet(queue.getResult("js/playerrun.json"));
+    console.log(playerSS);
 
-    player = new createjs.Shape();
-    player.graphics.beginFill("#FFF");
-    player.graphics.drawRect(0, 0, 20, 40);
+    player = new createjs.Sprite(playerSS, 'right');
     player.x = 50;
     player.y = 400;
     player.width = 20;
@@ -339,7 +374,8 @@ function initialize() {
     summonEnemy(200,400, false, container2);
     summonEnemy(700,400, true, container2);
     summonEnemy(500,400, false, container2);
-
+    summonEnemy(200,400, false, container);
+    summonEnemy(340,400, false, container);
 }
 
 function tickHappened(e) {
