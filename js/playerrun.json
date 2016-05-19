@@ -1,7 +1,7 @@
 {
   "framerate": 30,
   "images": ["img/playerright.png"],
-  "frames": {"width":51, "height":71, "regX":0, "regY":22},
+  "frames": {"width":51, "height":71, "regX":5, "regY":22},
   "animations": {
     "down": [0,3],
     "left": [4,7],
