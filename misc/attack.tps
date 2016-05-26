@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.2.1</string>
         <key>fileName</key>
-        <string>K:/School/Git/Casual-Games-Class-/misc/memes.tps</string>
+        <string>K:/School/Git/Casual-Games-Class-/misc/attack.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -36,7 +36,7 @@
         <key>dataFormat</key>
         <string>spritesheet-only</string>
         <key>textureFileName</key>
-        <filename>C:/Users/Bogdan/Downloads/1.png</filename>
+        <filename></filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -74,7 +74,7 @@
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
-        <uint>0</uint>
+        <uint>1</uint>
         <key>webpQualityLevel</key>
         <uint>101</uint>
         <key>textureSubPath</key>
@@ -86,7 +86,7 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>2800</int>
             <key>height</key>
             <int>2048</int>
         </QSize>
@@ -100,7 +100,7 @@
         <key>algorithmSettings</key>
         <struct type="AlgorithmSettings">
             <key>algorithm</key>
-            <enum type="AlgorithmSettings::AlgorithmId">Basic</enum>
+            <enum type="AlgorithmSettings::AlgorithmId">MaxRects</enum>
             <key>freeSizeMode</key>
             <enum type="AlgorithmSettings::AlgorithmFreeSizeMode">Best</enum>
             <key>sizeConstraints</key>
@@ -170,7 +170,7 @@
             <key>trimMargin</key>
             <uint>1</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">None</enum>
+            <enum type="SpriteSettings::TrimMode">Trim</enum>
             <key>tracerTolerance</key>
             <int>200</int>
             <key>heuristicMask</key>
@@ -182,10 +182,9 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">11111.png</key>
-            <key type="filename">jump.png</key>
-            <key type="filename">playerLeft.png</key>
-            <key type="filename">playerRight.png</key>
+            <key type="filename">jumpingAttack.png</key>
+            <key type="filename">runningAttack.png</key>
+            <key type="filename">standingAttack.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -193,10 +192,9 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>jump.png</filename>
-            <filename>playerLeft.png</filename>
-            <filename>playerRight.png</filename>
-            <filename>11111.png</filename>
+            <filename>jumpingAttack.png</filename>
+            <filename>runningAttack.png</filename>
+            <filename>standingAttack.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
