@@ -7,7 +7,7 @@
         dkd: false
     };
 
-    var gameLoss = false;
+    var gameIsRunning = true;
     var player;
     var enemyBlock = {};
     enemyBlock.width = 20;
@@ -20,31 +20,37 @@
     var speed = 3;
     var speedCurrent;
     var jumpTemp = 0;
-    var jumpSpeed = 25;
+    var jumpSpeed = 20;
     var isJumping = false;
     var mustTouchGround = false;
-    var enemySpeed = 6;
+
     var score = 0;
     var scoreText;
-    var healthText;
-    var sceneChange = false;
+    var lifeText;
+
+
     var ground;
     var ground2;
     var container;
-    var sceneMove = 0;
-    var scene = 1;
+
     var mouseCheck = false;
-    var weaponCooldown = 20;
+    var weaponCooldown = 10;
     var weaponDuration = 1;
-    var weaponWidh = 50;
-    var weaponHeight = 50;
+    var weaponWidh = 100;
+    var weaponHeight = 80;
     var attackTimer = 0;
     var attackCheck = false;
-    var weaponDamage = 2;
+    var weaponDamage = 1;
     var enemyList = [];
     var queue;
     var preloadText;
     var playerSS;
+    var enemyCount = 0;
+    var lifeFull = 5;
+    var timeUntilSummon = 0;
+    var timeUntilSummonMultiplier = 1;
+    var timeUntilSummonMultiplierIncrease = 60;
+    var summonMultiplierIncrease = 0.01;
 }
 
 
@@ -64,7 +70,7 @@ var goLeft = function () {
 };
 
 function fingerDown(e) {
-    /*  console.log(e.keyCode);*/
+    /*    console.log(e.keyCode);*/
     if (e.keyCode === 68) {
         keys.rkd = true;
     }
@@ -78,10 +84,13 @@ function fingerDown(e) {
         keys.dkd = true;
     }
     if (e.keyCode === 49) {
-        sceneChange = true;
+        // buttonul 1
     }
     if (e.keyCode === 50) {
-        scene = 2;
+        // buttonul 2
+    }
+    if (e.keyCode === 85) {
+        mouseCheck = true;
     }
 }
 
@@ -99,21 +108,22 @@ function fingerUp(e) {
         keys.dkd = false;
     }
     if (e.keyCode === 49) {
-        sceneChange = false;
+
     }
+    if (e.keyCode === 85) {
+        mouseCheck = false;
+    }
+
 }
 
-function mouseDown(event) {
-    var x = event.clientX;
-    var y = event.clientY;
-    var coords = "X coords: " + x + ", Y coords: " + y;
-    console.log(coords);
+function mouseDown() {
+
     mouseCheck = true;
 }
 
 function mouseUp() {
     mouseCheck = false;
-    console.log("released");
+
 }
 
 function charJump() {
@@ -127,7 +137,7 @@ function charJump() {
     }
     else if (mustTouchGround) {
         player.y += jumpTemp;
-        jumpTemp = (1 + factor) * jumpTemp;
+        jumpTemp = (1 + factor) * jumpTemp * 0.85;
     }
 }
 
@@ -144,15 +154,18 @@ function movePlayer() {
     }
     if ((keys.ukd) && (isJumping == false)) {
         if (mustTouchGround) {
-            return;
+
         }
         isJumping = true;
         jumpTemp = jumpSpeed;
         mustTouchGround = true;
     }
+    if (keys.dkd) {
+        player.y += speed*2;
+    }
 }
 
-function playerMove(directionPath) {
+function playerMove() {
     for (var i = 1; i <= 2; i++) {
         (function () {
             setTimeout(function () {
@@ -166,20 +179,49 @@ function playerMove(directionPath) {
 }
 
 function moveEnemies() {
-for ( var i = 0; i < enemyList.length; i++){
+    for (var i = 0; i < enemyList.length; i++) {
 
 
+        var enemyBlock = enemyList[i];
+        if (enemyBlock.enemyMove == true) {
+            if (enemyBlock.alive) {
+                enemyBlock.x = enemyBlock.x - enemyBlock.speedX;
+                if (enemyBlock.goingUp) {
+                    enemyBlock.y -= enemyBlock.speedY;
+                    if (enemyBlock.y < enemyBlock.posHeight - enemyBlock.maxHeightDiff) {
+                        enemyBlock.goingUp = false;
+                    }
 
-    var enemyBlock = enemyList[i];
-    if (enemyBlock.enemyMove == true ) {
-    if (enemyBlock.alive) {
-    enemyBlock.x = enemyBlock.x - enemySpeed;
-    if (enemyBlock.x < 0 - enemyBlock.width) {
-        enemyBlock.x = 780;
+                }
+                else {
+                    enemyBlock.y += enemyBlock.speedY;
+                    if (enemyBlock.y > enemyBlock.posHeight + enemyBlock.maxHeightDiff) {
+                        enemyBlock.goingUp = true;
+                    }
+                }
+                /* var tempY = enemyBlock.y;
+                 if (tempY == enemyBlock.y ) {
+                 enemyBlock.y--;
+                 if ((enemyBlock.y + 5 ) == tempY){
+                 enemyBlock.y++;
+                 }
+                 }*/
+
+
+                if (enemyBlock.x < 0 - enemyBlock.width) {
+                    enemyBlock.container.removeChild(enemyBlock);
+                    enemyBlock.alive = false;
+                    resetPosition(enemyBlock);
+                    enemyBlock.container.removeChild(enemyBlock.healthText);
+                    lifeFull--;
+                    enemyCount++;
+                }
+            }
         }
+        enemyBlock.healthText.x = enemyBlock.x - enemyBlock.width / 2;
+        enemyBlock.healthText.y = enemyBlock.y - enemyBlock.height;
+        enemyBlock.healthText.text = "Health : " + enemyBlock.currHealth;
     }
-    }
-}
 }
 
 
@@ -191,7 +233,7 @@ function hitTest(rect1, rect2) {
         || rect1.y + rect1.height <= rect2.y) {
         return false;
     }
-    console.log("HIT");
+
     return true;
 }
 
@@ -220,17 +262,17 @@ function collideBlock() {
     for (var i = 0; i < enemyList.length; i++) {
 
         var currCollider = {
-            x : enemyList[i].x + enemyList[i].container.x,
-            y : enemyList[i].y,
-            width : enemyList[i].width,
-            height : enemyList[i].height
+            x: enemyList[i].x + enemyList[i].container.x,
+            y: enemyList[i].y,
+            width: enemyList[i].width,
+            height: enemyList[i].height
         };
 
         if (hitTest(currCollider, weaponColide)) {
 
 
             enemyList[i].currHealth -= weaponDamage;
-            console.log(enemyList[i].currHealth);
+            /*      console.log(enemyList[i].currHealth);*/
             damageEnemy(enemyList[i]);
             enemyList[i].healthDamage = true;
         }
@@ -252,21 +294,26 @@ function damageEnemy(event) {
     }
 }
 
-function summonEnemy(x,y, moveCheck, containerTarget) {
+function summonEnemy(containerTarget) {
 
 
     var block = new createjs.Shape();
     block.graphics.beginFill('#FFF');
     block.graphics.drawRect(0, 0, 20, 40);
-    block.x = x;
-    block.y = y;
+    block.x = 800;
+    block.maxHeightDiff = Math.floor(Math.random() * ((200 - 5) + 1) + 5);
+    block.y = Math.floor(Math.random() * (((500 - block.maxHeightDiff) - (block.maxHeightDiff)) + 1) + block.maxHeightDiff);
+    block.goingUp = Math.random() <= 0.5;
+    block.posHeight = block.y;
+    block.speedY = Math.floor(Math.random() * ((2*(timeUntilSummonMultiplier) - 1) + 1) + 1);
+    block.speedX = Math.floor(Math.random() * ((2*(timeUntilSummonMultiplier) - 1) + 1) + 1);
     block.width = 20;
     block.height = 40;
-    block.health = Math.floor(Math.random() * (8 - 5 + 1)) + 5;
+    block.health = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
     block.currHealth = block.health;
     block.alive = true;
     block.healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
-    block.enemyMove = moveCheck;
+    block.enemyMove = true;
     block.container = containerTarget;
     block.healthDamage = true;
     containerTarget.addChild(block.healthText);
@@ -284,7 +331,6 @@ function resetPosition(event) {
 }
 
 function weaponAttack() {
-    console.log("Attacked");
     weaponColide = new createjs.Shape();
     weaponColide.graphics.beginFill('#FFF');
     weaponColide.graphics.drawRect(0, 0, weaponWidh, weaponHeight);
@@ -310,24 +356,23 @@ function initialize() {
     preload();
 }
 
-function preload(){
+function preload() {
     queue = new createjs.LoadQueue(true);
     queue.on("progress", progress);
     queue.on("complete", startGame);
 
     queue.loadManifest(
         [
-          /*  "img/1.jpg", "img/star.png",*/
-            {"id": "playerRun", "src":"js/playerrun.json"}
+            /*  "img/1.jpg", "img/star.png",*/
+            {"id": "playerRun", "src": "js/playerrun.json"}
         ]
     );
 }
 
 
-
-function progress(e){
-    var percent = Math.round(e.progress*100);
-    preloadText.text = "Loading: "+percent+"%";
+function progress(e) {
+    var percent = Math.round(e.progress * 100);
+    preloadText.text = "Loading: " + percent + "%";
     stage.update()
 }
 
@@ -340,28 +385,29 @@ function startGame() {
 
     player = new createjs.Sprite(playerSS, 'right');
     player.x = 50;
-    player.y = 400;
+    player.y = 500;
     player.width = 20;
     player.height = 40;
 
     scoreText = new createjs.Text('Score : ', "30px Courier", "#FFF");
+    scoreText.y = 50;
+    lifeText = new createjs.Text('Text : ', "30px Courier", "#FFF");
     //healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
-
 
 
     container = new createjs.Container();
     ground = new createjs.Bitmap("img/ground.png");
     ground.x = 0;
-    ground.y = 440;
+    ground.y = 540;
     ground2 = new createjs.Bitmap("img/ground.png");
     ground2.x = 800;
     ground2.y = 440;
-    container2 = new createjs.Container();
-    container2.x = 800;
+
 
     container.addChild(ground2, ground);
-    stage.addChild(container, container2);
+    stage.addChild(container);
     stage.addChild(scoreText);
+    stage.addChild(lifeText);
     stage.addChild(player);
     console.log(player);
     window.addEventListener('keydown', fingerDown);
@@ -370,23 +416,37 @@ function startGame() {
     window.addEventListener("mouseup", mouseUp);
 
     enemyList = [];
-    summonEnemy(400,400, true, container);
-    summonEnemy(200,400, false, container2);
-    summonEnemy(700,400, true, container2);
-    summonEnemy(500,400, false, container2);
-    summonEnemy(200,400, false, container);
-    summonEnemy(340,400, false, container);
 }
 
 function tickHappened(e) {
+    if (gameIsRunning) {
+        console.log(timeUntilSummonMultiplier);
     /*console.log(container.x);*/
+/*    console.log(timeUntilSummon + ", " + timeUntilSummonMultiplier);*/
+    timeUntilSummon--;
+    if (timeUntilSummon <= 0) {
+        summonEnemy(container);
+        summonEnemy(container);
+        summonEnemy(container);
+
+
+        timeUntilSummon = Math.floor(Math.random() * ((240 - 60) + 1) + 60);
+        timeUntilSummon /= timeUntilSummonMultiplier;
+
+    }
+    timeUntilSummonMultiplierIncrease--;
+    if (timeUntilSummonMultiplierIncrease <= 0 && timeUntilSummonMultiplier <= 5) {
+        timeUntilSummonMultiplier += summonMultiplierIncrease * timeUntilSummonMultiplier;
+        timeUntilSummonMultiplierIncrease = 200;
+    }
+
     movePlayer();
     if (isJumping || mustTouchGround) {
         charJump();
     }
-    if (player.y >= 400) {
+    if (player.y >= 500) {
         mustTouchGround = false;
-        player.y = 400;
+        player.y = 500;
     }
     if (player.x < 0) {
         player.x = 0;
@@ -401,15 +461,7 @@ function tickHappened(e) {
 
     score++;
     scoreText.text = "Score : " + score;
-    if (sceneChange == true) {
-
-        if (( sceneMove ) < 800 * scene) {
-            container.x -= 5;
-            container2.x -= 5;
-            sceneMove += 5;
-            console.log("carnacxe");
-        }
-    }
+    lifeText.text = "Life left " + lifeFull;
 
     if (mouseCheck) {
         if (weaponDuration == 0) {
@@ -435,25 +487,27 @@ function tickHappened(e) {
 
     for (var i = 0; i < enemyList.length; i++) {
         var enemyBlock = enemyList[i];
-        if (enemyBlock.alive == false) {
-            sceneChange = true;
-        }
+
         if ((( enemyBlock.health - enemyBlock.currHealth) >= enemyBlock.health) && (enemyBlock.healthDamage == true)) {
-            console.log("dead");
+            enemyCount++;
+            console.log(enemyCount);
             enemyBlock.healthDamage = false;
         }
         else if ((( enemyBlock.health - enemyBlock.currHealth) > enemyBlock.health / 2) && (enemyBlock.healthDamage == true)) {
-            console.log("damaged");
+
             enemyBlock.healthDamage = false;
             enemyBlock.healthText.color = "#f00";
 
         }
 
-        enemyBlock.healthText.x = enemyBlock.x - enemyBlock.width / 2;
-        enemyBlock.healthText.y = enemyBlock.y - enemyBlock.height;
-        enemyBlock.healthText.text = "Health : " + enemyBlock.currHealth;
 
     }
+        if ( lifeFull == 0 ){
+            gameIsRunning = false;
+        }
+
     moveEnemies();
     stage.update(e);
+
+    }
 }
