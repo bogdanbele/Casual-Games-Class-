@@ -9,9 +9,9 @@
 
     var gameIsRunning = true;
     var player;
-    var enemyBlock = {};
-    enemyBlock.width = 20;
-    enemyBlock.heigh = 40;
+    var block = {};
+    block.width = 20;
+    block.heigh = 40;
     var weaponColide = [];
     weaponColide.x = 0;
     weaponColide.y = 0;
@@ -23,7 +23,7 @@
     var jumpSpeed = 20;
     var isJumping = false;
     var mustTouchGround = false;
-
+    var enemyKills = 0;
     var score = 0;
     var scoreText;
     var lifeText;
@@ -34,7 +34,7 @@
     var container;
 
     var mouseCheck = false;
-    var weaponCooldown = 10;
+    var weaponCooldown = 20;
     var weaponDuration = 1;
     var weaponWidh = 100;
     var weaponHeight = 80;
@@ -42,15 +42,22 @@
     var attackCheck = false;
     var weaponDamage = 1;
     var enemyList = [];
+    var powerUpList = [];
     var queue;
     var preloadText;
     var playerSS;
-    var enemyCount = 0;
+
     var lifeFull = 5;
     var timeUntilSummon = 0;
     var timeUntilSummonMultiplier = 1;
     var timeUntilSummonMultiplierIncrease = 60;
     var summonMultiplierIncrease = 0.01;
+
+
+    var random = function(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+
 }
 
 
@@ -177,50 +184,106 @@ function playerMove() {
         })(i);
     }
 }
+function movePowerUp() {
+    for ( var i=0; i<powerUpList.length; i++){
+        var power = powerUpList[i];
 
+        if ( (power.y < 540-power.height ) && (power.levitate==false)){
+
+            power.y += power.speed;
+            power.speed=power.speed*1.01;
+        }
+        else if ((power.y + power.height  > 460) && ( power.levitate==false)){
+   power.y = 520 -power.height;
+            power.levitate=true;
+
+        }
+
+
+
+
+
+        if ((power.levitate) && (power.levCheck)) {
+            power.y ++;
+            power.levAmount++;
+
+        }
+         if ((power.levCheck)&&(power.levAmount >= 20 )) {
+            power.levCheck = false;
+        }
+         if (power.levCheck == false ){
+            power.y--;
+            power.levAmount--;
+        }
+         if ((power.levCheck == false ) && ( power.levAmount < -20 )){
+            power.levCheck = true;
+        }
+
+
+    }
+}
 function moveEnemies() {
     for (var i = 0; i < enemyList.length; i++) {
 
 
-        var enemyBlock = enemyList[i];
-        if (enemyBlock.enemyMove == true) {
-            if (enemyBlock.alive) {
-                enemyBlock.x = enemyBlock.x - enemyBlock.speedX;
-                if (enemyBlock.goingUp) {
-                    enemyBlock.y -= enemyBlock.speedY;
-                    if (enemyBlock.y < enemyBlock.posHeight - enemyBlock.maxHeightDiff) {
-                        enemyBlock.goingUp = false;
+        var block = enemyList[i];
+        if (block.enemyMove == true) {
+            if (block.alive) {
+                block.x = block.x - block.speedX;
+                if (block.goingUp) {
+                    block.y -= block.speedY;
+                    if (block.y < block.posHeight - block.maxHeightDiff) {
+                        block.goingUp = false;
                     }
 
                 }
                 else {
-                    enemyBlock.y += enemyBlock.speedY;
-                    if (enemyBlock.y > enemyBlock.posHeight + enemyBlock.maxHeightDiff) {
-                        enemyBlock.goingUp = true;
+                    block.y += block.speedY;
+                    if (block.y > block.posHeight + block.maxHeightDiff) {
+                        block.goingUp = true;
                     }
                 }
-                /* var tempY = enemyBlock.y;
-                 if (tempY == enemyBlock.y ) {
-                 enemyBlock.y--;
-                 if ((enemyBlock.y + 5 ) == tempY){
-                 enemyBlock.y++;
+                /* var tempY = block.y;
+                 if (tempY == block.y ) {
+                 block.y--;
+                 if ((block.y + 5 ) == tempY){
+                 block.y++;
                  }
                  }*/
 
 
-                if (enemyBlock.x < 0 - enemyBlock.width) {
-                    enemyBlock.container.removeChild(enemyBlock);
-                    enemyBlock.alive = false;
-                    resetPosition(enemyBlock);
-                    enemyBlock.container.removeChild(enemyBlock.healthText);
-                    lifeFull--;
-                    enemyCount++;
+                if (block.x < 0 - block.width) {
+                    block.container.removeChild(block);
+                    block.alive = false;
+                    if ( block.name == "trash") {
+                        lifeFull--;
+
+
+                    }
+                    else if ( block.name == "special" ){
+                        score+=1000;
+                    }
+                    else {
+                        score+=100;
+                    }
+                    resetPosition(block);
+                    block.container.removeChild(block.healthText);
+                   /* switch(block.name){
+                        case "trash":
+                            lifeFull--;
+                            enemyCount++;
+                            break;
+                        default:
+                            break;
+                        }*/
+
+
                 }
             }
         }
-        enemyBlock.healthText.x = enemyBlock.x - enemyBlock.width / 2;
-        enemyBlock.healthText.y = enemyBlock.y - enemyBlock.height;
-        enemyBlock.healthText.text = "Health : " + enemyBlock.currHealth;
+        block.healthText.x = block.x - block.width / 2;
+        block.healthText.y = block.y - block.height;
+        block.healthText.text = "Health : " + block.currHealth;
     }
 }
 
@@ -241,21 +304,38 @@ function hitTest(rect1, rect2) {
 /*
 
  function collide() {
- if (hitTest(enemyBlock, player)) {
+ if (hitTest(block, player)) {
  }
- if (hitTest(enemyBlock, weaponColide)) {
+ if (hitTest(block, weaponColide)) {
  for (var i = 1; i < enemyList.length; i++) {
 
- if (enemyBlock.id == i) {
- enemyBlock.currHealth -= weaponDamage;
- console.log(enemyBlock.currHealth);
- damageEnemy(enemyBlock);}
- enemyBlock.healthDamage = true;
+ if (block.id == i) {
+ block.currHealth -= weaponDamage;
+ console.log(block.currHealth);
+ damageEnemy(block);}
+ block.healthDamage = true;
  }
 
  }
  }
  */
+
+function collidePowerUp() {
+    for (var i = 0; i < powerUpList.length; i++)
+    {
+        var powerCollider = {
+            x : powerUpList[i].x,
+            y : powerUpList[i].y ,
+            width : powerUpList[i].width,
+            height : powerUpList[i].height
+        };
+
+        if (hitTest(powerCollider, player)){
+            speed += 0.01;
+          container.removeChild(powerUpList[i]);
+        }
+    }
+}
 
 function collideBlock() {
 
@@ -286,6 +366,21 @@ function damageEnemy(event) {
     if (event.currHealth < 1) {
         event.container.removeChild(event);
         event.alive = false;
+        if ( event.name == "trash") {
+         score+=10;
+            enemyKills++;
+            if (enemyKills % 5 == 0 ){
+                summonPowerUp(event.x, event.y);
+            }
+            console.log(enemyKills);
+
+        }
+        else if ( event.name == "special" ){
+            score+=100;
+        }
+        else {
+            lifeFull--;
+        }
         resetPosition(event);
         event.container.removeChild(event.healthText);
         delete enemyList[event];
@@ -293,32 +388,98 @@ function damageEnemy(event) {
 
     }
 }
+function summonPowerUp(posX, posY) {
+    var power = new createjs.Shape();
+    power.graphics.beginFill('#F00');
+    power.graphics.drawRect(0, 0, 31, 31);
+    power.width = 31;
+    power.height = 31;
+    power.x = posX;
+    power.y = posY;
+    power.speed = 1;
+    power.levitate = false;
+    power.levCheck = true;
+    power.levAmount = 0;
+    container.addChild(power);
+    powerUpList.push(power);
+}
 
-function summonEnemy(containerTarget) {
+
+function summonEnemy() {
 
 
     var block = new createjs.Shape();
-    block.graphics.beginFill('#FFF');
-    block.graphics.drawRect(0, 0, 20, 40);
+    block.type = random(1, 100);
+    block.name = "";
+    if( block.type <= 20 ) {
+        block.name = "fish";
+    }
+    else if ( block.type >= 95 ) {
+        block.name = "special";
+    }
+    else if ( 20 < block.type < 95 ) {
+        block.name = "trash";
+    }
+
+
+
+    switch(block.name){
+        case "fish":
+            console.log(block.name + " random number is : " + block.type);
+
+            block.graphics.beginFill('#bFF');
+            block.graphics.drawRect(0, 0, 60, 40);
+            block.width = 60;
+            block.height = 40;
+            block.speedY = 1;
+            block.speedX = 4;
+
+            break;
+        case "trash":
+            console.log(block.name + " random number is : " + block.type);
+
+            block.graphics.beginFill('#000');
+            block.graphics.drawRect(0, 0, 20, 40);
+            block.width = 20;
+            block.height = 40;
+            block.speedY = Math.floor(Math.random() * ((2*(timeUntilSummonMultiplier) - 1) + 1) + 1);
+            block.speedX = Math.floor(Math.random() * ((2*(timeUntilSummonMultiplier) - 1) + 1) + 1);
+
+            break;
+        case "special":
+            console.log(block.name + " random number is : " + block.type);
+
+
+            block.graphics.beginFill('#FFF');
+            block.graphics.drawRect(0, 0, 70, 70);
+            block.width = 70;
+            block.height = 70;
+            block.speedY = 0.6;
+            block.speedX = 0.6;
+
+            break;
+        default :
+            break;
+    }
     block.x = 800;
+
     block.maxHeightDiff = Math.floor(Math.random() * ((200 - 5) + 1) + 5);
-    block.y = Math.floor(Math.random() * (((500 - block.maxHeightDiff) - (block.maxHeightDiff)) + 1) + block.maxHeightDiff);
+    block.y = Math.floor(Math.random() * (((540-block.height - block.maxHeightDiff) - (block.maxHeightDiff)) + 1) + block.maxHeightDiff);
     block.goingUp = Math.random() <= 0.5;
     block.posHeight = block.y;
-    block.speedY = Math.floor(Math.random() * ((2*(timeUntilSummonMultiplier) - 1) + 1) + 1);
-    block.speedX = Math.floor(Math.random() * ((2*(timeUntilSummonMultiplier) - 1) + 1) + 1);
-    block.width = 20;
-    block.height = 40;
+
+
+
     block.health = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
     block.currHealth = block.health;
     block.alive = true;
     block.healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
     block.enemyMove = true;
-    block.container = containerTarget;
+    block.container = container;
     block.healthDamage = true;
-    containerTarget.addChild(block.healthText);
+    container.addChild(block.healthText);
 
-    containerTarget.addChild(block);
+    container.addChild(block);
     enemyList.push(block);
 
 }
@@ -384,10 +545,11 @@ function startGame() {
     console.log(playerSS);
 
     player = new createjs.Sprite(playerSS, 'right');
-    player.x = 50;
-    player.y = 500;
     player.width = 20;
     player.height = 40;
+    player.x = 50;
+    player.y = 540-player.height;
+
 
     scoreText = new createjs.Text('Score : ', "30px Courier", "#FFF");
     scoreText.y = 50;
@@ -425,12 +587,12 @@ function tickHappened(e) {
 /*    console.log(timeUntilSummon + ", " + timeUntilSummonMultiplier);*/
     timeUntilSummon--;
     if (timeUntilSummon <= 0) {
-        summonEnemy(container);
-        summonEnemy(container);
-        summonEnemy(container);
+        summonEnemy();
+        summonEnemy();
+        summonEnemy();
 
 
-        timeUntilSummon = Math.floor(Math.random() * ((240 - 60) + 1) + 60);
+        timeUntilSummon = Math.floor(Math.random() * ((340 - 70) + 1) + 70);
         timeUntilSummon /= timeUntilSummonMultiplier;
 
     }
@@ -444,9 +606,9 @@ function tickHappened(e) {
     if (isJumping || mustTouchGround) {
         charJump();
     }
-    if (player.y >= 500) {
+    if (player.y >= 540-player.height) {
         mustTouchGround = false;
-        player.y = 500;
+        player.y = 540-player.height;
     }
     if (player.x < 0) {
         player.x = 0;
@@ -459,7 +621,7 @@ function tickHappened(e) {
     }
     /*    collide();*/
 
-    score++;
+
     scoreText.text = "Score : " + score;
     lifeText.text = "Life left " + lifeFull;
 
@@ -486,27 +648,28 @@ function tickHappened(e) {
     }
 
     for (var i = 0; i < enemyList.length; i++) {
-        var enemyBlock = enemyList[i];
+        var block = enemyList[i];
 
-        if ((( enemyBlock.health - enemyBlock.currHealth) >= enemyBlock.health) && (enemyBlock.healthDamage == true)) {
-            enemyCount++;
-            console.log(enemyCount);
-            enemyBlock.healthDamage = false;
+        if ((( block.health - block.currHealth) >= block.health) && (block.healthDamage == true)) {
+
+            block.healthDamage = false;
         }
-        else if ((( enemyBlock.health - enemyBlock.currHealth) > enemyBlock.health / 2) && (enemyBlock.healthDamage == true)) {
+        else if ((( block.health - block.currHealth) > block.health / 2) && (block.healthDamage == true)) {
 
-            enemyBlock.healthDamage = false;
-            enemyBlock.healthText.color = "#f00";
+            block.healthDamage = false;
+            block.healthText.color = "#f00";
 
         }
 
 
     }
-        if ( lifeFull == 0 ){
+        if ( lifeFull <= 0 ){
             gameIsRunning = false;
         }
 
     moveEnemies();
+    movePowerUp();
+        collidePowerUp();
     stage.update(e);
 
     }
