@@ -1,0 +1,8 @@
+{
+  "framerate": 37,
+  "images": ["img/smallweed.png"],
+  "frames": {"width":58, "height":73, "regX":0, "regY":0},
+  "animations": {
+    "one": [0,36]
+  }
+}

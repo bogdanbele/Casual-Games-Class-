@@ -6,6 +6,9 @@
         ukd: false,
         dkd: false
     };
+    var seaWeed;
+    var seaWeedSS;
+    var blockSS;
     var gameIsRunning = true;
     var player;
     var block = {};
@@ -27,6 +30,8 @@
     var scoreText;
     var lifeText;
     var ground;
+    var ground3;
+    var ground4;
     var container;
     var mouseCheck = false;
     var weaponCooldown = 20;
@@ -46,6 +51,9 @@
     var timeUntilSummonMultiplier = 1;
     var timeUntilSummonMultiplierIncrease = 60;
     var summonMultiplierIncrease = 0.01;
+    var fishBonusHealth = 0;
+    var enemyHealthBonus = 0;
+    var colideCheck = false;
 
     var random = function (min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -83,10 +91,10 @@ function fingerDown(e) {
         keys.dkd = true;
     }
     if (e.keyCode === 49) {
-        // buttonul 1
+        colideCheck = true;
     }
     if (e.keyCode === 50) {
-        // buttonul 2
+        gameIsRunning = false;
     }
     if (e.keyCode === 85) {
         mouseCheck = true;
@@ -107,7 +115,10 @@ function fingerUp(e) {
         keys.dkd = false;
     }
     if (e.keyCode === 49) {
-
+colideCheck = false;
+    }
+    if (e.keyCode === 50) {
+       gameIsRunning = true;
     }
     if (e.keyCode === 85) {
         mouseCheck = false;
@@ -181,6 +192,7 @@ function movePowerUp() {
         if ((power.y < 540 - power.height ) && (power.levitate == false)) {
             power.y += power.speed;
             power.speed = power.speed * 1.01;
+            power.x--;
         }
         else if ((power.y + power.height > 460) && ( power.levitate == false)) {
             power.y = 520 - power.height;
@@ -190,6 +202,7 @@ function movePowerUp() {
         if ((power.levitate) && (power.levCheck)) {
             power.y++;
             power.levAmount++;
+            power.x--;
 
         }
         if ((power.levCheck) && (power.levAmount >= 20 )) {
@@ -198,6 +211,7 @@ function movePowerUp() {
         if (power.levCheck == false) {
             power.y--;
             power.levAmount--;
+            power.x--;
         }
         if ((power.levCheck == false ) && ( power.levAmount < -20 )) {
             power.levCheck = true;
@@ -231,17 +245,17 @@ function moveEnemies() {
 
                     }
                     else if (block.name == "special") {
-                        score += 1000;
+                        score += 500;
                     }
                     else {
-                        score += 100;
+                        score += 50;
                     }
                     resetPosition(block);
                     block.container.removeChild(block.healthText);
                 }
             }
         }
-        block.healthText.x = block.x - block.width / 2;
+        block.healthText.x = block.x ;
         block.healthText.y = block.y - block.height;
         block.healthText.text = "Health : " + block.currHealth;
     }
@@ -249,7 +263,7 @@ function moveEnemies() {
 
 function hitTest(rect1, rect2) {
     /*  console.log(" rect1 x = " + rect1.x + " rect 2 .x " + rect2.x + " rect2 width  " + rect2.width + " rect2 height " + rect2.height)*/
-    if (rect1.x >= rect2.x + rect2.width
+     if (rect1.x >= rect2.x + rect2.width
         || rect1.x + rect1.width <= rect2.x
         || rect1.y >= rect2.y + rect2.height
         || rect1.y + rect1.height <= rect2.y) {
@@ -267,7 +281,39 @@ function collidePowerUp() {
             height: powerUpList[i].height
         };
         if (hitTest(powerCollider, player)) {
-            speed += 0.17;
+
+            switch(powerUpList[i].name) {
+                case "speed":
+
+                    speed += 0.17;
+
+                    break;
+                case "attackSpeed":
+                    weaponCooldown--;
+
+                    break;
+                case "damage":
+                    weaponDamage++;
+
+                    break;
+                case "reinforce":
+                    fishBonusHealth++;
+
+                    break;
+                case "life":
+                    lifeFull++;
+
+                    break;
+                case "jump":
+                    jumpSpeed++;
+
+                    break;
+                case "wave":
+                    timeUntilSummonMultiplier= timeUntilSummonMultiplier * 0.9;
+
+                    break;
+            }
+
             container.removeChild(powerUpList[i]);
             resetPosition(powerUpList[i]);
         }
@@ -298,13 +344,13 @@ function damageEnemy(event) {
         if (event.name == "trash") {
             score += 10;
             enemyKills++;
-            if (enemyKills % 2 == 0) {
+            if (enemyKills % 15 == 0) {
                 summonPowerUp(event.x, event.y);
             }
             console.log(enemyKills);
         }
         else if (event.name == "special") {
-            score += 100;
+            score += 50;
         }
         else {
             lifeFull--;
@@ -317,43 +363,50 @@ function damageEnemy(event) {
 
 function summonPowerUp(posX, posY) {
     var power = new createjs.Shape();
-    power.type = random(1, 140);
+    power.type = random(1, 123);
     power.name ="";
-console.log(power.type + " carnace ");
+
     switch (power.type >= 0) {
 
         case (power.type<20):
             power.name = "speed";
+            power.graphics.beginFill('#1782ee');
 
             break;
         case (power.type<40):
             power.name = "attackSpeed";
+            power.graphics.beginFill('#ee9f17');
 
             break;
-        case (power.type<60):
+        case (power.type<43):
             power.name = "damage";
+            power.graphics.beginFill('#F00');
 
             break;
-        case (power.type<80):
+        case (power.type<63):
             power.name = "reinforce";
+            power.graphics.beginFill('#757575');
 
             break;
-        case (power.type<100):
+        case (power.type<83):
             power.name = "life";
+            power.graphics.beginFill('#eaaecb');
 
             break;
-        case (power.type<120):
+        case (power.type<103):
             power.name = "jump";
+            power.graphics.beginFill('#a972ee');
 
             break;
-        case (power.type<140):
+        case (power.type<123):
             power.name = "wave";
+            power.graphics.beginFill('#72eaee');
 
             break;
     }
 
 
-    power.graphics.beginFill('#F00');
+
     power.graphics.drawRect(0, 0, 31, 31);
     power.width = 31;
     power.height = 31;
@@ -374,31 +427,38 @@ function summonEnemy() {
     if (block.type <= 20) {
         block.name = "fish";
     }
-    else if (block.type >= 95) {
+    else if (block.type >= 98) {
         block.name = "special";
     }
-    else if (20 < block.type < 95) {
+    else if (20 < block.type < 98) {
         block.name = "trash";
     }
     switch (block.name) {
         case "fish":
             console.log(block.name + " random number is : " + block.type);
-            block.graphics.beginFill('#bFF');
-            block.graphics.drawRect(0, 0, 60, 40);
-            block.width = 60;
+            blockSS = new createjs.SpriteSheet(queue.getResult("js/fish.json"));
+            console.log(playerSS);
+            block = new createjs.Sprite(blockSS, 'one');
+            block.width = 159;
             block.height = 40;
+            block.scaleX = 1;
+            block.scaleY = 1;
             block.speedY = 1;
             block.speedX = 4;
+            block.health = fishBonusHealth + 1 ;
+
 
             break;
         case "trash":
-            console.log(block.name + " random number is : " + block.type);
+
             block.graphics.beginFill('#000');
-            block.graphics.drawRect(0, 0, 20, 40);
-            block.width = 20;
+            block.graphics.drawRect(0, 0, 40, 40);
+            block.width = 40;
             block.height = 40;
-            block.speedY = Math.floor(Math.random() * ((2 * (timeUntilSummonMultiplier) - 1) + 1) + 1);
-            block.speedX = Math.floor(Math.random() * ((2 * (timeUntilSummonMultiplier) - 1) + 1) + 1);
+            block.speedY = Math.floor(Math.random() * ((1.5 * (timeUntilSummonMultiplier) - 1) + 1) + 1);
+            block.speedX = Math.floor(Math.random() * ((1.3 * (timeUntilSummonMultiplier) - 1) + 1) + 1);
+            block.health = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
+            block.health += enemyHealthBonus;
 
             break;
         case "special":
@@ -409,6 +469,7 @@ function summonEnemy() {
             block.height = 70;
             block.speedY = 0.6;
             block.speedX = 0.6;
+            block.health = 1;
 
             break;
         default :
@@ -419,10 +480,10 @@ function summonEnemy() {
     block.y = Math.floor(Math.random() * (((540 - block.height - block.maxHeightDiff) - (block.maxHeightDiff)) + 1) + block.maxHeightDiff);
     block.goingUp = Math.random() <= 0.5;
     block.posHeight = block.y;
-    block.health = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
+
     block.currHealth = block.health;
     block.alive = true;
-    block.healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
+    block.healthText = new createjs.Text('Health :', "15px Nova Flat", "#0F0");
     block.enemyMove = true;
     block.container = container;
     block.healthDamage = true;
@@ -469,9 +530,11 @@ function preload() {
     queue.on("progress", progress);
     queue.on("complete", startGame);
     queue.loadManifest(
-        [
+        [   "img/background.png", "img/newground.png",
+            { id:'seaWeed', src: "js/seaweed.json"},
             /*  "img/1.jpg", "img/star.png",*/
-            {"id": "playerRun", "src": "js/playerrun.json"}
+            { id: "fish" , src: "js/fish.json"},
+            {id: "playerRun", src: "js/playerrun.json"}
         ]
     );
 }
@@ -498,10 +561,35 @@ function startGame() {
     lifeText = new createjs.Text('Text : ', "30px Courier", "#FFF");
     //healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
     container = new createjs.Container();
-    ground = new createjs.Bitmap("img/ground.png");
+    ground = new createjs.Bitmap("img/newground.png");
     ground.x = 0;
-    ground.y = 540;
-    container.addChild(ground);
+    ground.y = 400;
+    ground2 = new createjs.Bitmap("img/newground.png");
+    ground2.x = 800;
+    ground2.y = 400;
+    ground3 = new createjs.Bitmap("img/background.png");
+    ground4 = new createjs.Bitmap("img/background.png")
+
+    ground3.x = 0;
+    ground3.y = 345;
+    ground3.alpha = 1;
+    ground4.x = 800;
+    ground4.y= 345;
+    ground4.alpha =1;
+    
+
+
+
+    container.addChild( ground3, ground4);
+    container.addChild(ground, ground2);
+    seaWeedSS = new createjs.SpriteSheet(queue.getResult("js/seaweed.json"));
+    seaWeed = new createjs.Sprite( seaWeedSS, 'one');
+    seaWeed.x =  500;
+    seaWeed.height = 73;
+    seaWeed.width = 58;
+    seaWeed.y = 540 - seaWeed.height;
+    container.addChild( seaWeed);
+
     stage.addChild(container);
     stage.addChild(scoreText);
     stage.addChild(lifeText);
@@ -522,7 +610,7 @@ function tickHappened(e) {
             summonEnemy();
             summonEnemy();
             summonEnemy();
-            timeUntilSummon = Math.floor(Math.random() * ((340 - 70) + 1) + 70);
+            timeUntilSummon = Math.floor(Math.random() * ((390 - 90) + 1) + 90);
             timeUntilSummon /= timeUntilSummonMultiplier;
         }
         timeUntilSummonMultiplierIncrease--;
@@ -543,7 +631,13 @@ function tickHappened(e) {
         }
         if (ground.x < -800) {
             ground.x = 0;
+            ground2.x = 800;
         }
+        if (ground3.x < - 800 ){
+            ground3.x= 0;
+            ground4.x = 800;
+        }
+
         scoreText.text = "Score : " + score;
         lifeText.text = "Life left " + lifeFull;
         if (mouseCheck) {
@@ -578,10 +672,27 @@ function tickHappened(e) {
         if (lifeFull <= 0) {
             gameIsRunning = false;
         }
+        if (weaponCooldown <= 7) {
+            weaponCooldown = 7;
+        }
+
+        if (colideCheck) {
+
+
+        }
+        ground4.x-=0.2*timeUntilSummonMultiplier;
+        ground3.x-= 0.2*timeUntilSummonMultiplier;
+        ground.x-=0.9*timeUntilSummonMultiplier;
+        ground2.x-=0.9*timeUntilSummonMultiplier;
+        seaWeed.x-=0.9*timeUntilSummonMultiplier;
+        if( seaWeed.x + seaWeed.width < 1) {
+            seaWeed.x = 800;
+        }
         moveEnemies();
         movePowerUp();
         collidePowerUp();
         stage.update(e);
+
 
     }
 }

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="r7">
+    <folder id="0">
+        <file id="0" name="fish base.png" width="137" height="36" pivot_x="0" pivot_y="1"/>
+        <file id="1" name="tail.png" width="24" height="44" pivot_x="0" pivot_y="1"/>
+        <file id="2" name="fin down.png" width="19" height="17" pivot_x="0" pivot_y="1"/>
+        <file id="3" name="fin up.png" width="25" height="15" pivot_x="0" pivot_y="1"/>
+    </folder>
+    <entity id="0" name="entity_000">
+        <animation id="0" name="NewAnimation" length="600" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="2" key="1" z_index="0"/>
+                    <object_ref id="1" timeline="3" key="0" z_index="1"/>
+                    <object_ref id="2" timeline="0" key="0" z_index="2"/>
+                    <object_ref id="3" timeline="1" key="0" z_index="3"/>
+                </key>
+                <key id="1" time="288">
+                    <object_ref id="0" timeline="2" key="2" z_index="0"/>
+                    <object_ref id="1" timeline="3" key="1" z_index="1"/>
+                    <object_ref id="2" timeline="0" key="1" z_index="2"/>
+                    <object_ref id="3" timeline="1" key="1" z_index="3"/>
+                </key>
+                <key id="2" time="345">
+                    <object_ref id="0" timeline="2" key="4" z_index="0"/>
+                    <object_ref id="1" timeline="3" key="2" z_index="1"/>
+                    <object_ref id="2" timeline="0" key="1" z_index="2"/>
+                    <object_ref id="3" timeline="1" key="1" z_index="3"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="fish base">
+                <key id="0" spin="0">
+                    <object folder="0" file="0" x="62.69877" y="20.675818" angle="0" scale_x="-1"/>
+                </key>
+                <key id="1" time="288" spin="0">
+                    <object folder="0" file="0" x="62.69877" y="24.109294" angle="0" scale_x="-1"/>
+                </key>
+            </timeline>
+            <timeline id="1" name="tail">
+                <key id="0" spin="0">
+                    <object folder="0" file="1" x="85.269926" y="24.621212" angle="0" scale_x="-1"/>
+                </key>
+                <key id="1" time="288" spin="0">
+                    <object folder="0" file="1" x="73.539519" y="28.054689" angle="0" scale_x="-0.530342"/>
+                </key>
+            </timeline>
+            <timeline id="2" name="fin down">
+                <key id="0">
+                    <object folder="0" file="2" x="-14.284791" y="-11.640389" angle="0" scale_x="-1"/>
+                </key>
+                <key id="1">
+                    <object folder="0" file="2" x="-1.284791" y="-6.918166" angle="0" scale_x="-1"/>
+                </key>
+                <key id="2" time="288">
+                    <object folder="0" file="2" x="-2.552507" y="-0.687903" angle="14.812943" scale_x="-1"/>
+                </key>
+                <key id="3" time="345">
+                    <object folder="0" file="2" x="-2.803409" y="-3.567848" pivot_x="0" pivot_y="1" angle="17.744672" scale_x="-1"/>
+                </key>
+                <key id="4" time="345" spin="-1">
+                    <object folder="0" file="2" x="-13.745704" y="-12.027491" pivot_x="0.684211" pivot_y="0.722222" angle="17.744672" scale_x="-1"/>
+                </key>
+            </timeline>
+            <timeline id="3" name="fin up">
+                <key id="0" spin="-1">
+                    <object folder="0" file="3" x="7.05081" y="30.154976" angle="0" scale_x="-1"/>
+                </key>
+                <key id="1" time="288" spin="-1">
+                    <object folder="0" file="3" x="7.05081" y="30.791219" angle="353.323025" scale_x="-1" scale_y="0.89689"/>
+                </key>
+                <key id="2" time="345">
+                    <object folder="0" file="3" x="7.05081" y="26.804124" angle="352.001541" scale_x="-1" scale_y="0.876482"/>
+                </key>
+            </timeline>
+        </animation>
+    </entity>
+</spriter_data>
