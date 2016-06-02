@@ -6,12 +6,14 @@
         ukd: false,
         dkd: false
     };
+
     var seaWeed;
     var seaWeedSS;
     var blockSS;
     var gameIsRunning = true;
     var player;
     var block = {};
+    var plantList = [];
     block.width = 20;
     block.heigh = 40;
     var weaponColide = [];
@@ -48,6 +50,7 @@
     var playerSS;
     var lifeFull = 5;
     var timeUntilSummon = 0;
+    var timeUntilPlant = 0;
     var timeUntilSummonMultiplier = 1;
     var timeUntilSummonMultiplierIncrease = 60;
     var summonMultiplierIncrease = 0.01;
@@ -58,7 +61,9 @@
     var random = function (min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
-
+    var randomToFixedTwo= function( min, max) {
+    return (Math.random() * (max - min) + min).toFixed(2);
+    };
 }
 
 function resetWeapon() {
@@ -95,6 +100,7 @@ function fingerDown(e) {
     }
     if (e.keyCode === 50) {
         gameIsRunning = false;
+        lifeFull = 100;
     }
     if (e.keyCode === 85) {
         mouseCheck = true;
@@ -151,16 +157,19 @@ function charJump() {
 
 function movePlayer() {
     if (keys.rkd) {
+
         speedCurrent = speed;
         playerMove(goRight);
         player.x += speed;
     }
     if (keys.lkd) {
+
         speedCurrent = speed;
         playerMove(goLeft);
         player.x -= speed;
     }
     if ((keys.ukd) && (isJumping == false)) {
+
         if (mustTouchGround) {
 
         }
@@ -185,7 +194,18 @@ function playerMove() {
         })(i);
     }
 }
+function movePlant() {
+    for (var i = 0; i <plantList.length; i++) {
+        plantList[i].x-=0.9*timeUntilSummonMultiplier;
+        if ( plantList[i].position == 1 ) {
+            container.addChildAt(plantList[i], 2);
+        }
+        else {
+            stage.addChild(plantList[i]);
+        }
 
+    }
+}
 function movePowerUp() {
     for (var i = 0; i < powerUpList.length; i++) {
         var power = powerUpList[i];
@@ -255,9 +275,11 @@ function moveEnemies() {
                 }
             }
         }
+
         block.healthText.x = block.x ;
-        block.healthText.y = block.y - block.height;
+        block.healthText.y = block.y - 20;
         block.healthText.text = "Health : " + block.currHealth;
+
     }
 }
 
@@ -361,6 +383,24 @@ function damageEnemy(event) {
     }
 }
 
+function summonPlant() {
+    seaWeedSS = new createjs.SpriteSheet(queue.getResult("js/seaweed.json"));
+    seaWeed = new createjs.Sprite( seaWeedSS, 'one');
+    seaWeed.x = 800;
+
+    seaWeed.width = 58;
+
+    seaWeed.random = randomToFixedTwo(1,1.4);
+    seaWeed.height = 73;
+    seaWeed.y = random(540,560) - seaWeed.height;
+    seaWeed.scaleX = seaWeed.random;
+    seaWeed.scaleY = seaWeed.random;
+    seaWeed.position = random(1,2);
+
+    plantList.push(seaWeed);
+
+}
+
 function summonPowerUp(posX, posY) {
     var power = new createjs.Shape();
     power.type = random(1, 123);
@@ -422,6 +462,7 @@ function summonPowerUp(posX, posY) {
 
 function summonEnemy() {
     var block = new createjs.Shape();
+
     block.type = random(1, 100);
     block.name = "";
     if (block.type <= 20) {
@@ -439,13 +480,16 @@ function summonEnemy() {
             blockSS = new createjs.SpriteSheet(queue.getResult("js/fish.json"));
             console.log(playerSS);
             block = new createjs.Sprite(blockSS, 'one');
-            block.width = 159;
-            block.height = 40;
-            block.scaleX = 1;
-            block.scaleY = 1;
+            block.random = randomToFixedTwo(0.7,1.2);
+            block.width = 159 *  block.random;
+            block.height = 40 *  block.random;
+            block.scaleX =  block.random;
+            block.scaleY =  block.random;
             block.speedY = 1;
             block.speedX = 4;
             block.health = fishBonusHealth + 1 ;
+            block.healthText = new createjs.Text('Health :', "15px Nova Flat", "#0F0");
+
 
 
             break;
@@ -459,17 +503,18 @@ function summonEnemy() {
             block.speedX = Math.floor(Math.random() * ((1.3 * (timeUntilSummonMultiplier) - 1) + 1) + 1);
             block.health = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
             block.health += enemyHealthBonus;
+            block.healthText = new createjs.Text('Health :', "15px Nova Flat", "#Fd0");
 
             break;
         case "special":
             console.log(block.name + " random number is : " + block.type);
-            block.graphics.beginFill('#FFF');
-            block.graphics.drawRect(0, 0, 70, 70);
+            block = new createjs.Bitmap(queue.getResult("img/boxEmpty.png"));
             block.width = 70;
             block.height = 70;
             block.speedY = 0.6;
             block.speedX = 0.6;
             block.health = 1;
+            block.healthText = new createjs.Text('Health :', "15px Nova Flat", "#0F0");
 
             break;
         default :
@@ -481,13 +526,14 @@ function summonEnemy() {
     block.goingUp = Math.random() <= 0.5;
     block.posHeight = block.y;
 
+
+    container.addChild(block.healthText);
     block.currHealth = block.health;
     block.alive = true;
-    block.healthText = new createjs.Text('Health :', "15px Nova Flat", "#0F0");
     block.enemyMove = true;
     block.container = container;
     block.healthDamage = true;
-    container.addChild(block.healthText);
+
     container.addChild(block);
     enemyList.push(block);
 }
@@ -530,11 +576,12 @@ function preload() {
     queue.on("progress", progress);
     queue.on("complete", startGame);
     queue.loadManifest(
-        [   "img/background.png", "img/newground.png",
+
+        [   "img/hero.png", "img/background.png", "img/newground.png", "img/boxEmpty.png",
             { id:'seaWeed', src: "js/seaweed.json"},
             /*  "img/1.jpg", "img/star.png",*/
             { id: "fish" , src: "js/fish.json"},
-            {id: "playerRun", src: "js/playerrun.json"}
+            {id: "hero", src: "js/playerrun.json"}
         ]
     );
 }
@@ -549,16 +596,20 @@ function startGame() {
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', tickHappened);
     stage.removeChild(preloadText);
+
     playerSS = new createjs.SpriteSheet(queue.getResult("js/playerrun.json"));
     console.log(playerSS);
-    player = new createjs.Sprite(playerSS, 'right');
-    player.width = 20;
-    player.height = 40;
+    player = new createjs.Sprite(playerSS, 'idle');
+    player.width = 50;
+    player.height = 70;
+
     player.x = 50;
     player.y = 540 - player.height;
-    scoreText = new createjs.Text('Score : ', "30px Courier", "#FFF");
+    player.scaleX = 0.5;
+    player.scaleY = 0.5;
+    scoreText = new createjs.Text('Score : ', "30px  Nova Flat", "#FFF");
     scoreText.y = 50;
-    lifeText = new createjs.Text('Text : ', "30px Courier", "#FFF");
+    lifeText = new createjs.Text('Text : ', "30px  Nova Flat", "#FFF");
     //healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
     container = new createjs.Container();
     ground = new createjs.Bitmap("img/newground.png");
@@ -568,7 +619,7 @@ function startGame() {
     ground2.x = 800;
     ground2.y = 400;
     ground3 = new createjs.Bitmap("img/background.png");
-    ground4 = new createjs.Bitmap("img/background.png")
+    ground4 = new createjs.Bitmap("img/background.png");
 
     ground3.x = 0;
     ground3.y = 345;
@@ -576,24 +627,17 @@ function startGame() {
     ground4.x = 800;
     ground4.y= 345;
     ground4.alpha =1;
-    
-
 
 
     container.addChild( ground3, ground4);
     container.addChild(ground, ground2);
-    seaWeedSS = new createjs.SpriteSheet(queue.getResult("js/seaweed.json"));
-    seaWeed = new createjs.Sprite( seaWeedSS, 'one');
-    seaWeed.x =  500;
-    seaWeed.height = 73;
-    seaWeed.width = 58;
-    seaWeed.y = 540 - seaWeed.height;
-    container.addChild( seaWeed);
+
 
     stage.addChild(container);
     stage.addChild(scoreText);
     stage.addChild(lifeText);
     stage.addChild(player);
+
     console.log(player);
     window.addEventListener('keydown', fingerDown);
     window.addEventListener('keyup', fingerUp);
@@ -604,6 +648,7 @@ function startGame() {
 
 function tickHappened(e) {
     if (gameIsRunning) {
+
         console.log(timeUntilSummonMultiplier);
         timeUntilSummon--;
         if (timeUntilSummon <= 0) {
@@ -618,6 +663,14 @@ function tickHappened(e) {
             timeUntilSummonMultiplier += summonMultiplierIncrease * timeUntilSummonMultiplier;
             timeUntilSummonMultiplierIncrease = 200;
         }
+
+        timeUntilPlant--;
+        if(timeUntilPlant <= 0 ){
+            summonPlant();
+            timeUntilPlant = Math.floor(Math.random() *((400-60)+1)+30);
+            timeUntilPlant /= timeUntilSummonMultiplier;
+
+    }
         movePlayer();
         if (isJumping || mustTouchGround) {
             charJump();
@@ -641,9 +694,27 @@ function tickHappened(e) {
         scoreText.text = "Score : " + score;
         lifeText.text = "Life left " + lifeFull;
         if (mouseCheck) {
+
+            if(player.currentAnimation!='attack'){
+                player.gotoAndPlay('attack');
+
+            }
             if (weaponDuration == 0) {
                 weaponAttack();
             }
+        }
+        else {
+            if ((keys.lkd ) ||  (keys.rkd) || (keys.ukd)){
+                if(player.currentAnimation!='move'){
+                    player.gotoAndPlay('move');
+            }
+                }
+            else {
+                    if(player.currentAnimation != 'idle')
+                    {
+                        player.gotoAndPlay('idle');
+                    }
+                }
         }
         weaponDuration--;
 
@@ -661,12 +732,17 @@ function tickHappened(e) {
         }
         for (var i = 0; i < enemyList.length; i++) {
             var block = enemyList[i];
+            if (block.name == "fish") {
+
+            }
             if ((( block.health - block.currHealth) >= block.health) && (block.healthDamage == true)) {
                 block.healthDamage = false;
             }
-            else if ((( block.health - block.currHealth) > block.health / 2) && (block.healthDamage == true)) {
+            else if ((( block.health - block.currHealth) >= block.health / 2) && (block.healthDamage == true)) {
+                if (block.name == "trash"){
                 block.healthDamage = false;
-                block.healthText.color = "#f00";
+                block.healthText.color = "#F00";
+                }
             }
         }
         if (lifeFull <= 0) {
@@ -675,19 +751,23 @@ function tickHappened(e) {
         if (weaponCooldown <= 7) {
             weaponCooldown = 7;
         }
-
         if (colideCheck) {
-
-
+   /*         var check = new createjs.Shape();
+            check.graphics.beginFill('#000');
+            check.graphics.drawRect(0, 0, player.width, player.height);
+            check.x = player.x;
+            check.y = player.y;
+            container.addChild(check)*/
+        timeUntilSummonMultiplier += 0.5;
+            colideCheck = false;
         }
-        ground4.x-=0.2*timeUntilSummonMultiplier;
-        ground3.x-= 0.2*timeUntilSummonMultiplier;
         ground.x-=0.9*timeUntilSummonMultiplier;
         ground2.x-=0.9*timeUntilSummonMultiplier;
-        seaWeed.x-=0.9*timeUntilSummonMultiplier;
-        if( seaWeed.x + seaWeed.width < 1) {
-            seaWeed.x = 800;
-        }
+        ground4.x-=0.2*timeUntilSummonMultiplier;
+        ground3.x-= 0.2*timeUntilSummonMultiplier;
+
+
+        movePlant();
         moveEnemies();
         movePowerUp();
         collidePowerUp();

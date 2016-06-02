@@ -1,11 +1,17 @@
 {
-  "framerate": 30,
-  "images": ["img/playerright.png"],
-  "frames": {"width":51, "height":71, "regX":5, "regY":22},
+  "framerate": 40,
+  "images": ["img/hero.png"],
+  "frames": {"width":163, "height":145, "regX":10, "regY":0},
   "animations": {
     "down": [0,3],
     "left": [4,7],
-    "right":[0,36],
-    "up":[12,15]
+    "move":[38,73],
+    "attack" : [0, 36],
+    "idle" : [75, 110]
   }
+
+
+
 }
+
+
