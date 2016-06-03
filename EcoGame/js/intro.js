@@ -6,7 +6,10 @@
         ukd: false,
         dkd: false
     };
-
+    var textMultiply = 1;
+    var textTimer = 1;
+    var textFader = false;
+    var bigText;
     var seaWeed;
     var seaWeedSS;
     var blockSS;
@@ -34,6 +37,8 @@
     var ground;
     var ground3;
     var ground4;
+    var ground5;
+    var ground6;
     var container;
     var mouseCheck = false;
     var weaponCooldown = 20;
@@ -198,12 +203,19 @@ function movePlant() {
     for (var i = 0; i <plantList.length; i++) {
         plantList[i].x-=0.9*timeUntilSummonMultiplier;
         if ( plantList[i].position == 1 ) {
-            container.addChildAt(plantList[i], 2);
+            container.addChildAt(plantList[i], 4);
         }
         else {
             stage.addChild(plantList[i]);
         }
+        if (plantList[i].x < -500)  {
+            plantList.splice(plantList[i], 1);
+            container.removeChild(plantList[i]);
 
+
+            console.log("deleted");
+
+        }
     }
 }
 function movePowerUp() {
@@ -214,22 +226,22 @@ function movePowerUp() {
             power.speed = power.speed * 1.01;
             power.x--;
         }
-        else if ((power.y + power.height > 460) && ( power.levitate == false)) {
-            power.y = 520 - power.height;
+        else if ((power.y + power.height > 380) && ( power.levitate == false)) {
+            power.y = 540 - power.height;
             power.levitate = true;
         }
 
         if ((power.levitate) && (power.levCheck)) {
-            power.y++;
+            power.y+=1.001*power.speed;
             power.levAmount++;
             power.x--;
 
         }
-        if ((power.levCheck) && (power.levAmount >= 20 )) {
+        if ((power.levCheck) && (power.levAmount >= 12 )) {
             power.levCheck = false;
         }
         if (power.levCheck == false) {
-            power.y--;
+            power.y-=1.001*power.speed;
             power.levAmount--;
             power.x--;
         }
@@ -247,13 +259,13 @@ function moveEnemies() {
                 block.x = block.x - block.speedX;
                 if (block.goingUp) {
                     block.y -= block.speedY;
-                    if (block.y < block.posHeight - block.maxHeightDiff) {
+                    if (block.y < block.posHeight - block.maxHeightDiff + 30 ) {
                         block.goingUp = false;
                     }
                 }
                 else {
                     block.y += block.speedY;
-                    if (block.y > block.posHeight + block.maxHeightDiff) {
+                    if (block.y > block.posHeight + block.maxHeightDiff - 20) {
                         block.goingUp = true;
                     }
                 }
@@ -276,8 +288,8 @@ function moveEnemies() {
             }
         }
 
-        block.healthText.x = block.x ;
-        block.healthText.y = block.y - 20;
+        block.healthText.x = block.x - block.regX;
+        block.healthText.y = block.y - 20 - block.regY;
         block.healthText.text = "Health : " + block.currHealth;
 
     }
@@ -304,40 +316,104 @@ function collidePowerUp() {
         };
         if (hitTest(powerCollider, player)) {
 
-            switch(powerUpList[i].name) {
+            switch(powerUpList[i].name){
                 case "speed":
-
                     speed += 0.17;
+                   if ( textFader == false ) {
+                    bigText.text = " Swim Speed Increased !";
+                    stage.addChild(bigText);
+                       bigText.x += 50;
+                    console.log("blue");
+                       bigText.alpha= 1;
+                       textFader = true;
+                   }
+
+
 
                     break;
                 case "attackSpeed":
                     weaponCooldown--;
+                    if ( textFader == false ) {
+                        bigText.text = " Attack Speed increased !";
+                    bigText.color = "#ee9f17";
+                    stage.addChild(bigText);
+                    console.log("blue");
+                    bigText.alpha= 1;
+                    textFader = true;
+                    }
+
 
                     break;
                 case "damage":
                     weaponDamage++;
+                    if ( textFader == false ) {
+                        bigText.text = "Weapon Damage Increased !";
+                        bigText.color = "#F00";
+                        stage.addChild(bigText);
+                        console.log("blue");
+                        bigText.alpha= 1;
+                        textFader = true;
+                    }
 
                     break;
                 case "reinforce":
                     fishBonusHealth++;
+                    if ( textFader == false ) {
+                        bigText.text = "Fish Health Increased !";
+                        bigText.x += 50;
+                        bigText.color = "#757575";
+                        stage.addChild(bigText);
+                        console.log("blue");
+                        bigText.alpha= 1;
+                        textFader = true;
+                    }
 
                     break;
                 case "life":
                     lifeFull++;
+                    if ( textFader == false ) {
+                        bigText.text = "Bonus health !";
+                        bigText.x += 90;
+                        bigText.color = "#eaaecb";
+                        stage.addChild(bigText);
+                        console.log("blue");
+                        bigText.alpha= 1;
+                        textFader = true;
+                    }
+
 
                     break;
                 case "jump":
                     jumpSpeed++;
+                    if ( textFader == false ) {
+                        bigText.text = "Jump Height Increased !";
+                        bigText.color = "#a972ee"
+                        bigText.x += 20;
+                        stage.addChild(bigText);
+                        console.log("blue");
+                        bigText.alpha= 1;
+                        textFader = true;
+                    }
 
                     break;
                 case "wave":
                     timeUntilSummonMultiplier= timeUntilSummonMultiplier * 0.9;
+                    if ( textFader == false ) {
+                        bigText.text = "The game is 10% Slower !";
+                        bigText.x -= 50;
+                        bigText.color = "#72eaee";
+                        stage.addChild(bigText);
+                        console.log("blue");
+                        bigText.alpha= 1;
+                        textFader = true;
+                    }
 
                     break;
             }
-
             container.removeChild(powerUpList[i]);
             resetPosition(powerUpList[i]);
+
+
         }
     }
 }
@@ -380,6 +456,7 @@ function damageEnemy(event) {
         resetPosition(event);
         event.container.removeChild(event.healthText);
         delete enemyList[event];
+
     }
 }
 
@@ -411,6 +488,7 @@ function summonPowerUp(posX, posY) {
         case (power.type<20):
             power.name = "speed";
             power.graphics.beginFill('#1782ee');
+
 
             break;
         case (power.type<40):
@@ -486,7 +564,7 @@ function summonEnemy() {
             block.scaleX =  block.random;
             block.scaleY =  block.random;
             block.speedY = 1;
-            block.speedX = 4;
+            block.speedX = random(3,5);
             block.health = fishBonusHealth + 1 ;
             block.healthText = new createjs.Text('Health :', "15px Nova Flat", "#0F0");
 
@@ -495,10 +573,12 @@ function summonEnemy() {
             break;
         case "trash":
 
-            block.graphics.beginFill('#000');
-            block.graphics.drawRect(0, 0, 40, 40);
+            block = new createjs.Bitmap(queue.getResult("img/trash1.png"));
+            block.name = "trash";
             block.width = 40;
             block.height = 40;
+            block.regX = block.width/2;
+            block.regY = block.height/2;
             block.speedY = Math.floor(Math.random() * ((1.5 * (timeUntilSummonMultiplier) - 1) + 1) + 1);
             block.speedX = Math.floor(Math.random() * ((1.3 * (timeUntilSummonMultiplier) - 1) + 1) + 1);
             block.health = Math.floor(Math.random() * (3 - 1 + 1)) + 1;
@@ -521,8 +601,8 @@ function summonEnemy() {
             break;
     }
     block.x = 800;
-    block.maxHeightDiff = Math.floor(Math.random() * ((200 - 5) + 1) + 5);
-    block.y = Math.floor(Math.random() * (((540 - block.height - block.maxHeightDiff) - (block.maxHeightDiff)) + 1) + block.maxHeightDiff);
+    block.maxHeightDiff = Math.floor(Math.random() * ((200 - 45) + 1) + 45);
+    block.y = Math.floor(Math.random() * (((560 - block.height - block.maxHeightDiff) - (block.maxHeightDiff)) + 1) + block.maxHeightDiff);
     block.goingUp = Math.random() <= 0.5;
     block.posHeight = block.y;
 
@@ -577,7 +657,7 @@ function preload() {
     queue.on("complete", startGame);
     queue.loadManifest(
 
-        [   "img/hero.png", "img/background.png", "img/newground.png", "img/boxEmpty.png",
+        [  "img/backgroundback.png", "img/trash1.png", "img/hero.png", "img/background.png", "img/newground.png", "img/boxEmpty.png",
             { id:'seaWeed', src: "js/seaweed.json"},
             /*  "img/1.jpg", "img/star.png",*/
             { id: "fish" , src: "js/fish.json"},
@@ -612,23 +692,31 @@ function startGame() {
     lifeText = new createjs.Text('Text : ', "30px  Nova Flat", "#FFF");
     //healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
     container = new createjs.Container();
-    ground = new createjs.Bitmap("img/newground.png");
+    ground = new createjs.Bitmap(queue.getResult("img/newground.png"));
     ground.x = 0;
     ground.y = 400;
-    ground2 = new createjs.Bitmap("img/newground.png");
+    ground2 = new createjs.Bitmap(queue.getResult("img/newground.png"));
     ground2.x = 800;
     ground2.y = 400;
-    ground3 = new createjs.Bitmap("img/background.png");
-    ground4 = new createjs.Bitmap("img/background.png");
-
+    ground3 = new createjs.Bitmap(queue.getResult("img/background.png"));
+    ground4 = new createjs.Bitmap(queue.getResult("img/background.png"));
+    ground5 = new createjs.Bitmap(queue.getResult("img/backgroundback.png"));
+    ground6 = new createjs.Bitmap(queue.getResult("img/backgroundback.png"));
     ground3.x = 0;
     ground3.y = 345;
     ground3.alpha = 1;
     ground4.x = 800;
     ground4.y= 345;
     ground4.alpha =1;
+    ground5.x= 0;
+    ground5.y = 000;
+    ground6.x = 800;
+    ground6.y = 000;
+    bigText = new createjs.Text('Swim Speed Increased :', "45px Nova Flat", "#1782ee");
+    bigText.x = 150;
+    bigText.y = 200;
 
-
+    container.addChild( ground5, ground6);
     container.addChild( ground3, ground4);
     container.addChild(ground, ground2);
 
@@ -648,6 +736,10 @@ function startGame() {
 
 function tickHappened(e) {
     if (gameIsRunning) {
+
+        for (var i = 0; i <plantList.length; i++) {
+
+        }
 
         console.log(timeUntilSummonMultiplier);
         timeUntilSummon--;
@@ -690,9 +782,13 @@ function tickHappened(e) {
             ground3.x= 0;
             ground4.x = 800;
         }
+        if (ground5.x < - 800 ){
+            ground5.x= 0;
+            ground6.x = 800;
+        }
 
         scoreText.text = "Score : " + score;
-        lifeText.text = "Life left " + lifeFull;
+        lifeText.text = "Health left " + lifeFull;
         if (mouseCheck) {
 
             if(player.currentAnimation!='attack'){
@@ -731,9 +827,12 @@ function tickHappened(e) {
             attackCheck = false;
         }
         for (var i = 0; i < enemyList.length; i++) {
-            var block = enemyList[i];
-            if (block.name == "fish") {
 
+            var block = enemyList[i];
+            switch (block.name) {
+                case "trash":
+                    block.rotation--;
+                    break;
             }
             if ((( block.health - block.currHealth) >= block.health) && (block.healthDamage == true)) {
                 block.healthDamage = false;
@@ -745,6 +844,8 @@ function tickHappened(e) {
                 }
             }
         }
+
+
         if (lifeFull <= 0) {
             gameIsRunning = false;
         }
@@ -761,11 +862,23 @@ function tickHappened(e) {
         timeUntilSummonMultiplier += 0.5;
             colideCheck = false;
         }
+if ( textFader ) {
+    textTimer-=(0.001)*textMultiply;
+    bigText.alpha= textTimer;
+    textMultiply+=0.2;
+}
+        if ( textTimer <= 0 ) {
+            textFader = false;
+            textTimer =1 ;
+            textMultiply =1;
+            stage.removeChild(bigText);
+        }
         ground.x-=0.9*timeUntilSummonMultiplier;
         ground2.x-=0.9*timeUntilSummonMultiplier;
-        ground4.x-=0.2*timeUntilSummonMultiplier;
-        ground3.x-= 0.2*timeUntilSummonMultiplier;
-
+        ground4.x-=0.4*timeUntilSummonMultiplier;
+        ground3.x-= 0.4*timeUntilSummonMultiplier;
+        ground5.x-=0.2*timeUntilSummonMultiplier;
+        ground6.x-= 0.2*timeUntilSummonMultiplier;
 
         movePlant();
         moveEnemies();
