@@ -871,6 +871,7 @@ if ( textFader ) {
             textFader = false;
             textTimer =1 ;
             textMultiply =1;
+            bigText.x = 150;
             stage.removeChild(bigText);
         }
         ground.x-=0.9*timeUntilSummonMultiplier;
