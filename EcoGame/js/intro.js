@@ -315,7 +315,7 @@ function collidePowerUp() {
             height: powerUpList[i].height
         };
         if (hitTest(powerCollider, player)) {
-
+            bigText.x = 150;
             switch(powerUpList[i].name){
                 case "speed":
                     speed += 0.17;
@@ -871,7 +871,7 @@ if ( textFader ) {
             textFader = false;
             textTimer =1 ;
             textMultiply =1;
-            bigText.x = 150;
+
             stage.removeChild(bigText);
         }
         ground.x-=0.9*timeUntilSummonMultiplier;

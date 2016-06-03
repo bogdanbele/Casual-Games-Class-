@@ -25,8 +25,8 @@
       <file leaf-file-name="intro.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/EcoGame/js/intro.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
-              <caret line="874" column="39" selection-start-line="874" selection-start-column="39" selection-end-line="874" selection-end-column="39" />
+            <state relative-caret-position="377">
+              <caret line="317" column="28" selection-start-line="317" selection-start-column="28" selection-end-line="317" selection-end-column="28" />
               <folding>
                 <element signature="n#!!block;n#hitTest#0" expanded="false" />
                 <element signature="n#!!block;n#collideBlock#0" expanded="false" />
@@ -246,12 +246,12 @@
       <updated>1464594911758</updated>
       <workItem from="1464594914533" duration="15697000" />
       <workItem from="1464750954029" duration="23427000" />
-      <workItem from="1464904106408" duration="11520000" />
+      <workItem from="1464904106408" duration="11748000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="50644000" />
+    <option name="totallyTimeSpent" value="50872000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="42" width="1611" height="867" extended-state="0" />
@@ -428,8 +428,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/EcoGame/js/intro.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="874" column="39" selection-start-line="874" selection-start-column="39" selection-end-line="874" selection-end-column="39" />
+        <state relative-caret-position="377">
+          <caret line="317" column="28" selection-start-line="317" selection-start-column="28" selection-end-line="317" selection-end-column="28" />
           <folding>
             <element signature="n#!!block;n#hitTest#0" expanded="false" />
             <element signature="n#!!block;n#collideBlock#0" expanded="false" />
