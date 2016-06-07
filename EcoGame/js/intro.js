@@ -6,6 +6,7 @@
         ukd: false,
         dkd: false
     };
+
     var textMultiply = 1;
     var textTimer = 1;
     var textFader = false;
@@ -71,6 +72,46 @@
     };
 }
 
+function gameReset() {
+    textFader = false;
+    gameIsRunning = true;
+    block = {};
+    plantList = [];
+    block.width = 20;
+    block.heigh = 40;
+    weaponColide = [];
+    weaponColide.x = 0;
+    weaponColide.y = 0;
+    weaponColide.width = 0;
+    weaponColide.height = 0;
+    speed = 3;
+    jumpTemp = 0;
+    jumpSpeed = 18;
+    isJumping = false;
+    mustTouchGround = false;
+    enemyKills = 0;
+    score = 0;
+    mouseCheck = false;
+    weaponCooldown = 20;
+    weaponDuration = 1;
+    weaponWidh = 100;
+    weaponHeight = 80;
+    attackTimer = 0;
+    attackCheck = false;
+    weaponDamage = 1;
+    enemyList = [];
+    powerUpList = [];
+    lifeFull = 5;
+    timeUntilSummon = 0;
+    timeUntilPlant = 0;
+    timeUntilSummonMultiplier = 1;
+    timeUntilSummonMultiplierIncrease = 60;
+    summonMultiplierIncrease = 0.01;
+    fishBonusHealth = 0;
+    enemyHealthBonus = 0;
+    colideCheck = false;
+}
+
 function resetWeapon() {
     weaponColide.x = 0;
     weaponColide.y = 0;
@@ -104,11 +145,19 @@ function fingerDown(e) {
         colideCheck = true;
     }
     if (e.keyCode === 50) {
-        gameIsRunning = false;
-        lifeFull = 100;
+  /*      gameIsRunning = false;
+        lifeFull = 100;*/
+        stage.clear();
+        stage.removeAllChildren ();
+        stage.removeAllEventListeners();
+        gameReset();
+        startPressed()
     }
     if (e.keyCode === 85) {
         mouseCheck = true;
+    }
+    if (e.keyCode == 51 ){
+        lifeFull+=100;
     }
 }
 
@@ -232,7 +281,7 @@ function movePowerUp() {
         }
 
         if ((power.levitate) && (power.levCheck)) {
-            power.y+=1.001*power.speed;
+            power.y+=2;
             power.levAmount++;
             power.x--;
 
@@ -241,7 +290,7 @@ function movePowerUp() {
             power.levCheck = false;
         }
         if (power.levCheck == false) {
-            power.y-=1.001*power.speed;
+            power.y-=2;
             power.levAmount--;
             power.x--;
         }
@@ -315,14 +364,16 @@ function collidePowerUp() {
             height: powerUpList[i].height
         };
         if (hitTest(powerCollider, player)) {
-            bigText.x = 150;
+            bigText.x = stage.canvas.width /2 ;
+            bigText.y = stage.canvas.height /2 - 150;
+            bigText.textBaseline = "middle";
+            bigText.textAlign = "center";
             switch(powerUpList[i].name){
                 case "speed":
                     speed += 0.17;
                    if ( textFader == false ) {
                     bigText.text = " Swim Speed Increased !";
                     stage.addChild(bigText);
-                       bigText.x += 50;
                     console.log("blue");
                        bigText.alpha= 1;
                        textFader = true;
@@ -360,7 +411,6 @@ function collidePowerUp() {
                     fishBonusHealth++;
                     if ( textFader == false ) {
                         bigText.text = "Fish Health Increased !";
-                        bigText.x += 50;
                         bigText.color = "#757575";
                         stage.addChild(bigText);
                         console.log("blue");
@@ -373,7 +423,6 @@ function collidePowerUp() {
                     lifeFull++;
                     if ( textFader == false ) {
                         bigText.text = "Bonus health !";
-                        bigText.x += 90;
                         bigText.color = "#eaaecb";
                         stage.addChild(bigText);
                         console.log("blue");
@@ -388,7 +437,6 @@ function collidePowerUp() {
                     if ( textFader == false ) {
                         bigText.text = "Jump Height Increased !";
                         bigText.color = "#a972ee"
-                        bigText.x += 20;
                         stage.addChild(bigText);
                         console.log("blue");
                         bigText.alpha= 1;
@@ -400,7 +448,6 @@ function collidePowerUp() {
                     timeUntilSummonMultiplier= timeUntilSummonMultiplier * 0.9;
                     if ( textFader == false ) {
                         bigText.text = "The game is 10% Slower !";
-                        bigText.x -= 50;
                         bigText.color = "#72eaee";
                         stage.addChild(bigText);
                         console.log("blue");
@@ -642,22 +689,24 @@ function weaponAttack() {
 
 function initialize() {
     stage = new createjs.Stage("intro");
-    preloadText = new createjs.Text("Loading", "30px Verdana", "#000");
+    preload();
+
+}
+
+function preload() {
+    preloadText = new createjs.Text("Loading", "30px Roboto", "#3e3e3e");
     preloadText.textBaseline = "middle";
     preloadText.textAlign = "center";
     preloadText.x = stage.canvas.width / 2;
     preloadText.y = stage.canvas.height / 2;
     stage.addChild(preloadText);
-    preload();
-}
-
-function preload() {
     queue = new createjs.LoadQueue(true);
     queue.on("progress", progress);
     queue.on("complete", startGame);
     queue.loadManifest(
 
-        [  "img/backgroundback.png", "img/trash1.png", "img/hero.png", "img/background.png", "img/newground.png", "img/boxEmpty.png",
+        [  "img/backgroundback.png", "img/trash1.png", "img/hero.png", "img/background.png", "img/newground.png", "img/boxEmpty.png", "img/helpC.png",
+            "img/start.png", "img/help.png", "img/options.png",
             { id:'seaWeed', src: "js/seaweed.json"},
             /*  "img/1.jpg", "img/star.png",*/
             { id: "fish" , src: "js/fish.json"},
@@ -673,73 +722,111 @@ function progress(e) {
 }
 
 function startGame() {
-    createjs.Ticker.setFPS(60);
-    createjs.Ticker.addEventListener('tick', tickHappened);
-    stage.removeChild(preloadText);
-
     playerSS = new createjs.SpriteSheet(queue.getResult("js/playerrun.json"));
-    console.log(playerSS);
-    player = new createjs.Sprite(playerSS, 'idle');
-    player.width = 50;
-    player.height = 70;
+    stage.removeChild(preloadText);
+    startButton = new createjs.Bitmap(queue.getResult("img/start.png"));
+    startButton.addEventListener('click', startClick);
+    startButton.width = startButton.getBounds().width;
+    startButton.x = stage.canvas.width / 2 - startButton.width/2;
+    startButton.y = 100 ;
+    stage.addChild(startButton);
 
-    player.x = 50;
-    player.y = 540 - player.height;
-    player.scaleX = 0.5;
-    player.scaleY = 0.5;
-    scoreText = new createjs.Text('Score : ', "30px  Nova Flat", "#FFF");
-    scoreText.y = 50;
-    lifeText = new createjs.Text('Text : ', "30px  Nova Flat", "#FFF");
-    //healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
-    container = new createjs.Container();
-    ground = new createjs.Bitmap(queue.getResult("img/newground.png"));
-    ground.x = 0;
-    ground.y = 400;
-    ground2 = new createjs.Bitmap(queue.getResult("img/newground.png"));
-    ground2.x = 800;
-    ground2.y = 400;
-    ground3 = new createjs.Bitmap(queue.getResult("img/background.png"));
-    ground4 = new createjs.Bitmap(queue.getResult("img/background.png"));
-    ground5 = new createjs.Bitmap(queue.getResult("img/backgroundback.png"));
-    ground6 = new createjs.Bitmap(queue.getResult("img/backgroundback.png"));
-    ground3.x = 0;
-    ground3.y = 345;
-    ground3.alpha = 1;
-    ground4.x = 800;
-    ground4.y= 345;
-    ground4.alpha =1;
-    ground5.x= 0;
-    ground5.y = 000;
-    ground6.x = 800;
-    ground6.y = 000;
-    bigText = new createjs.Text('Swim Speed Increased :', "45px Nova Flat", "#1782ee");
-    bigText.x = 150;
-    bigText.y = 200;
+    helpButton = new createjs.Bitmap(queue.getResult("img/help.png"));
+    helpButton.addEventListener('click', helpClick);
+    helpButton.width = helpButton.getBounds().width;
+    helpButton.x = stage.canvas.width / 2 - helpButton.width/2;
+    helpButton.y = 200;
+    stage.addChild(helpButton);
 
-    container.addChild( ground5, ground6);
-    container.addChild( ground3, ground4);
-    container.addChild(ground, ground2);
+    optionsButton = new createjs.Bitmap(queue.getResult("img/options.png"));
+    optionsButton.addEventListener('click', startClick);
+    optionsButton.width = optionsButton.getBounds().width;
+    optionsButton.x = stage.canvas.width / 2 - optionsButton.width/2;
+    optionsButton.y = 300;
+    stage.addChild(optionsButton);
 
+function helpClick() {
 
-    stage.addChild(container);
-    stage.addChild(scoreText);
-    stage.addChild(lifeText);
-    stage.addChild(player);
-
-    console.log(player);
-    window.addEventListener('keydown', fingerDown);
-    window.addEventListener('keyup', fingerUp);
-    window.addEventListener("mousedown", mouseDown);
-    window.addEventListener("mouseup", mouseUp);
-    enemyList = [];
+helpButton.image = (queue.getResult("img/helpC.png"));
+    stage.update();
 }
+    stage.update();
+    function startClick() {
+        startPressed();
+        stage.removeChild(startButton);
+        stage.removeChild(optionsButton);
+        stage.removeChild(helpButton);
+        stage.update();
+    }
+
+    }
+
+function startPressed() {
+        createjs.Ticker.setFPS(60);
+        createjs.Ticker.addEventListener('tick', tickHappened);
+
+
+
+        console.log(playerSS);
+        player = new createjs.Sprite(playerSS, 'idle');
+        player.width = 50;
+        player.height = 70;
+
+        player.x = 50;
+        player.y = 540 - player.height;
+        player.scaleX = 0.5;
+        player.scaleY = 0.5;
+        scoreText = new createjs.Text('Score : ', "30px  Nova Flat", "#FFF");
+        scoreText.y = 50;
+        lifeText = new createjs.Text('Text : ', "30px  Nova Flat", "#FFF");
+        //healthText = new createjs.Text('Health :', "30px Calibri", "#0F0");
+        container = new createjs.Container();
+        ground = new createjs.Bitmap(queue.getResult("img/newground.png"));
+        ground.x = 0;
+        ground.y = 400;
+        ground2 = new createjs.Bitmap(queue.getResult("img/newground.png"));
+        ground2.x = 800;
+        ground2.y = 400;
+        ground3 = new createjs.Bitmap(queue.getResult("img/background.png"));
+        ground4 = new createjs.Bitmap(queue.getResult("img/background.png"));
+        ground5 = new createjs.Bitmap(queue.getResult("img/backgroundback.png"));
+        ground6 = new createjs.Bitmap(queue.getResult("img/backgroundback.png"));
+        ground3.x = 0;
+        ground3.y = 345;
+        ground3.alpha = 1;
+        ground4.x = 800;
+        ground4.y = 345;
+        ground4.alpha = 1;
+        ground5.x = 0;
+        ground5.y = 000;
+        ground6.x = 800;
+        ground6.y = 000;
+        bigText = new createjs.Text('Swim Speed Increased :', "45px Nova Flat", "#1782ee");
+        bigText.x = 150;
+        bigText.y = 200;
+
+        container.addChild(ground5, ground6);
+        container.addChild(ground3, ground4);
+        container.addChild(ground, ground2);
+
+
+        stage.addChild(container);
+        stage.addChild(scoreText);
+        stage.addChild(lifeText);
+        stage.addChild(player);
+
+        console.log(player);
+        window.addEventListener('keydown', fingerDown);
+        window.addEventListener('keyup', fingerUp);
+        window.addEventListener("mousedown", mouseDown);
+        window.addEventListener("mouseup", mouseUp);
+        enemyList = [];
+    }
+
 
 function tickHappened(e) {
     if (gameIsRunning) {
 
-        for (var i = 0; i <plantList.length; i++) {
-
-        }
 
         console.log(timeUntilSummonMultiplier);
         timeUntilSummon--;
