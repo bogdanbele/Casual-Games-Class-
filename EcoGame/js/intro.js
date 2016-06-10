@@ -6,7 +6,23 @@
         ukd: false,
         dkd: false
     };
-
+    var hitS = createjs.Sound.play('hit');
+    var volume = 0.2;
+    var volumeVol;
+    var volumePlus;
+    var volumeMinus;
+    var musicPlus;
+    var musicMinus;
+    var musicText;
+    var volumeText;
+    var musVolume = 0.5;
+    var musicVol;
+    var difficultyText;
+    var easyB;
+    var normalB;
+    var hardB;
+    var helpSplash;
+    var difficulty = 2;
     var textMultiply = 1;
     var textTimer = 1;
     var textFader = false;
@@ -52,9 +68,9 @@
     var enemyList = [];
     var powerUpList = [];
     var queue;
+    var lifeFull= 5;
     var preloadText;
     var playerSS;
-    var lifeFull = 5;
     var timeUntilSummon = 0;
     var timeUntilPlant = 0;
     var timeUntilSummonMultiplier = 1;
@@ -64,6 +80,22 @@
     var enemyHealthBonus = 0;
     var colideCheck = false;
 
+    function difficultyCheck() {
+    if ( difficulty == 1){
+         lifeFull = 10;
+        summonMultiplierIncrease = 0.005;
+        fishBonusHealth=1;
+
+    }
+    else if ( difficulty == 2){
+         lifeFull = 5;
+    }
+    else if ( difficulty == 3 ){
+         lifeFull = 5;
+        summonMultiplierIncrease = 0.012;
+
+    }
+    }
     var random = function (min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     };
@@ -110,6 +142,8 @@ function gameReset() {
     fishBonusHealth = 0;
     enemyHealthBonus = 0;
     colideCheck = false;
+
+    difficultyCheck();
 }
 
 function resetWeapon() {
@@ -373,6 +407,7 @@ function collidePowerUp() {
                     speed += 0.17;
                    if ( textFader == false ) {
                     bigText.text = " Swim Speed Increased !";
+                       bigText.color = "#1782ee";
                     stage.addChild(bigText);
                     console.log("blue");
                        bigText.alpha= 1;
@@ -436,7 +471,7 @@ function collidePowerUp() {
                     jumpSpeed++;
                     if ( textFader == false ) {
                         bigText.text = "Jump Height Increased !";
-                        bigText.color = "#a972ee"
+                        bigText.color = "#a972ee";
                         stage.addChild(bigText);
                         console.log("blue");
                         bigText.alpha= 1;
@@ -480,6 +515,7 @@ function collideBlock() {
             enemyList[i].healthDamage = true;
         }
     }
+
 }
 
 function damageEnemy(event) {
@@ -685,6 +721,11 @@ function weaponAttack() {
     weaponDuration = weaponCooldown;
     weaponColide.alpha = 1;
     collideBlock();
+
+    hitS = createjs.Sound.play('hit');
+    hitS.setVolume(volume);
+
+
 }
 
 function initialize() {
@@ -694,25 +735,49 @@ function initialize() {
 }
 
 function preload() {
+
     preloadText = new createjs.Text("Loading", "30px Roboto", "#3e3e3e");
     preloadText.textBaseline = "middle";
     preloadText.textAlign = "center";
     preloadText.x = stage.canvas.width / 2;
     preloadText.y = stage.canvas.height / 2;
+
     stage.addChild(preloadText);
     queue = new createjs.LoadQueue(true);
+    queue.installPlugin(createjs.Sound);
     queue.on("progress", progress);
     queue.on("complete", startGame);
     queue.loadManifest(
 
-        [  "img/backgroundback.png", "img/trash1.png", "img/hero.png", "img/background.png", "img/newground.png", "img/boxEmpty.png", "img/helpC.png",
-            "img/start.png", "img/help.png", "img/options.png",
+        [  "img/backgroundback.png",
+            "img/trash1.png",
+            "img/hero.png",
+            "img/background.png",
+            "img/newground.png",
+            "img/boxEmpty.png",
+            "img/helpC.png",
+            "img/start.png",
+            "img/help.png",
+            "img/options.png",
+            "img/helpscreen.png",
+            "img/optionsC.png",
+            "img/easy.png",
+            "img/easyC.png",
+            "img/normal.png",
+            "img/normalC.png",
+            "img/hard.png",
+            "img/hardC.png",
+            "img/vol3.png","img/vol2.png","img/vol1.png","img/vol4.png",
+            "img/plusMus.png","img/minusMus.png",
             { id:'seaWeed', src: "js/seaweed.json"},
             /*  "img/1.jpg", "img/star.png",*/
             { id: "fish" , src: "js/fish.json"},
-            {id: "hero", src: "js/playerrun.json"}
+            {id: "hero", src: "js/playerrun.json"},
+            { id:"hit", src:"audio/hit.mp3"},
+            { id:"theme", src:"audio/background.mp3"}
         ]
     );
+
 }
 
 function progress(e) {
@@ -722,40 +787,352 @@ function progress(e) {
 }
 
 function startGame() {
+    var themeS = createjs.Sound.play('theme');
+    if ( volume == 0 ){
+        themeS.setVolume(0);    }
+    else {
+        themeS.setVolume(musVolume/2);
+    }
+
+    if ( volume == 0 ){
+        hitS.setVolume(0);    }
+    else {
+
+    }
+    themeS.loop = -1;
+    var loadText = new createjs.Text("EcoSave by Bogdan Bele", "30px Roboto", "#2c3e50");
+    loadText.textBaseline = "middle";
+    loadText.textAlign = "center";
+    loadText.x = stage.canvas.width / 2;
+    loadText.y = 30;
+    stage.addChild(loadText);
+
+    var helpC = false;
+    var optionsC = false;
     playerSS = new createjs.SpriteSheet(queue.getResult("js/playerrun.json"));
     stage.removeChild(preloadText);
-    startButton = new createjs.Bitmap(queue.getResult("img/start.png"));
+    var startButton = new createjs.Bitmap(queue.getResult("img/start.png"));
     startButton.addEventListener('click', startClick);
-    startButton.width = startButton.getBounds().width;
+
+        startButton.width = startButton.getBounds().width;
     startButton.x = stage.canvas.width / 2 - startButton.width/2;
     startButton.y = 100 ;
     stage.addChild(startButton);
 
-    helpButton = new createjs.Bitmap(queue.getResult("img/help.png"));
+    var helpButton = new createjs.Bitmap(queue.getResult("img/help.png"));
     helpButton.addEventListener('click', helpClick);
+
     helpButton.width = helpButton.getBounds().width;
     helpButton.x = stage.canvas.width / 2 - helpButton.width/2;
     helpButton.y = 200;
     stage.addChild(helpButton);
 
-    optionsButton = new createjs.Bitmap(queue.getResult("img/options.png"));
-    optionsButton.addEventListener('click', startClick);
+    var optionsButton = new createjs.Bitmap(queue.getResult("img/options.png"));
+    optionsButton.addEventListener('click', optionsClick);
     optionsButton.width = optionsButton.getBounds().width;
     optionsButton.x = stage.canvas.width / 2 - optionsButton.width/2;
     optionsButton.y = 300;
     stage.addChild(optionsButton);
 
-function helpClick() {
 
-helpButton.image = (queue.getResult("img/helpC.png"));
+
+function optionsClick(){
+
+    if ( helpC == true ) {
+    stage.removeChild(helpSplash);
+        helpC = false;
+    }
+    if ( optionsC == false ){
+        optionsButton.image = (queue.getResult("img/optionsC.png"));
+        optionsC = true;
+        easyB = new createjs.Bitmap(queue.getResult("img/easy.png"));
+        easyB.addEventListener('click', easyClick);
+        easyB.x = 100;
+        easyB.y = 200;
+        normalB = new createjs.Bitmap(queue.getResult("img/normalC.png"));
+        normalB.addEventListener('click', normalClick);
+        normalB.x =100;
+        normalB.y = 250;
+        hardB = new createjs.Bitmap(queue.getResult("img/hard.png"));
+        hardB.addEventListener('click', hardClick);
+        hardB.x = 100;
+        hardB.y = 300;
+        stage.addChild(hardB);
+        stage.addChild(normalB);
+        stage.addChild(easyB);
+        difficultyText = new createjs.Text("3 Enemies spawn \n\nNormal progression \n\n5 lives", "20px Roboto", "#2c3e50");
+        difficultyText.textBaseline = "middle";
+        difficultyText.textAlign = "left";
+        difficultyText.x = 50;
+        difficultyText.y = 450;
+        musicVol = new createjs.Bitmap(queue.getResult("img/vol4.png"));
+        musicVol.x = 750;
+        musicVol.y= 213;
+        musicVol.scaleX=0.5;
+        musicVol.scaleY=0.5;
+        musicText = new createjs.Text("", "20px Roboto", "#2c3e50");
+        musicText.textBaseline = "middle";
+        musicText.textAlign = "left";
+        musicText.x = 550;
+        musicText.y = 225;
+        musicPlus = new createjs.Bitmap(queue.getResult("img/plusMus.png"));
+        musicPlus.addEventListener('click', volumeMPlus);
+        musicPlus.x = 710;
+        musicPlus.y= 213;
+        musicPlus.scaleX=0.5;
+        musicPlus.scaleY=0.5;
+        musicMinus = new createjs.Bitmap(queue.getResult("img/minusMus.png"));
+        musicMinus.addEventListener('click', volumeMMinus);
+        musicMinus.x = 510;
+        musicMinus.y= 213;
+        musicMinus.scaleX=0.5;
+        musicMinus.scaleY=0.5;
+
+        volumeVol = new createjs.Bitmap(queue.getResult("img/vol4.png"));
+        volumeVol.x = 750;
+        volumeVol.y= 313;
+        volumeVol.scaleX=0.5;
+        volumeVol.scaleY=0.5;
+        volumeText = new createjs.Text("", "20px Roboto", "#2c3e50");
+        volumeText.textBaseline = "middle";
+        volumeText.textAlign = "left";
+        volumeText.x = 550;
+        volumeText.y = 325;
+        volumePlus = new createjs.Bitmap(queue.getResult("img/plusMus.png"));
+        volumePlus.addEventListener('click', volumeFPlus);
+        volumePlus.x = 710;
+        volumePlus.y= 313;
+        volumePlus.scaleX=0.5;
+        volumePlus.scaleY=0.5;
+        volumeMinus = new createjs.Bitmap(queue.getResult("img/minusMus.png"));
+        volumeMinus.addEventListener('click', volumeFMinus);
+        volumeMinus.x = 510;
+        volumeMinus.y= 313;
+        volumeMinus.scaleX=0.5;
+        volumeMinus.scaleY=0.5;
+
+        stage.addChild(musicMinus);
+        stage.addChild(musicPlus);
+        stage.addChild(musicVol);
+        stage.addChild(musicText);
+        stage.addChild(volumeText);
+        stage.addChild(volumeMinus);
+        stage.addChild(volumePlus);
+        stage.addChild(volumeVol);
+
+        var floorVolume = (Math.floor(volume*10)).toFixed();
+        var floorMusVolume = (Math.floor(musVolume*10)).toFixed();
+
+
+
+        musicText.text = "Music Volume: " + floorMusVolume;
+        volumeText.text = "FX Volume: " +  floorVolume;
+        changeSoundIconMusic();
+
+        function volumeMPlus(){
+
+            musVolume+=0.1;
+
+            if (musVolume>1 ){
+                musVolume = 1;
+            }
+            var floorVolume = (Math.floor(musVolume*10)).toFixed();
+            musicText.text = "Music Volume: " +  floorVolume;
+            themeS.setVolume(musVolume/2);
+            changeSoundIconMusic();
+            changeSoundIconVolume();
+            stage.update();
+        }
+        function volumeMMinus(){
+
+            musVolume-=0.1;
+
+            if (musVolume<0 ){
+                musVolume = 0;
+            }
+            var floorVolume = (Math.floor(musVolume*10)).toFixed();
+            musicText.text = "Music Volume: " +  floorVolume;
+
+            themeS.setVolume(musVolume/2);
+            changeSoundIconMusic();
+            stage.update();
+        }
+
+        function volumeFPlus(){
+
+            volume+=0.1;
+
+            if (volume>1 ){
+                volume = 1;
+            }
+            var floorVolume = (Math.floor(volume*10)).toFixed();
+            volumeText.text = "FX Volume: " +  floorVolume;
+
+
+
+            changeSoundIconVolume();
+            hitS = createjs.Sound.play('hit');
+            hitS.setVolume(volume);
+
+            stage.update();
+        }
+        function volumeFMinus(){
+
+            volume-=0.1;
+
+            if (volume<0 ){
+                volume = 0;
+            }
+            var floorVolume = (Math.floor(volume*10)).toFixed();
+            volumeText.text = "FX Volume: " +  floorVolume;
+            hitS = createjs.Sound.play('hit');
+            hitS.setVolume(volume);
+
+            changeSoundIconVolume();
+
+            stage.update();
+        }
+
+
+
+
+
+
+        function changeSoundIconMusic() {
+            if (musVolume >= 0.9 ) {
+                musicVol.image  = (queue.getResult("img/vol4.png"));
+            }
+            if( 0.9 > musVolume > 0.5) {
+                musicVol.image  = (queue.getResult("img/vol3.png"));
+            }
+            if( 0.5 >= musVolume > 0) {
+                musicVol.image  = (queue.getResult("img/vol2.png"));
+            }
+            if( musVolume == 0 ) {
+                musicVol.image  = (queue.getResult("img/vol1.png"));
+            }
+
+        }
+        function changeSoundIconVolume() {
+            if (volume >= 0.9 ) {
+                volumeVol.image  = (queue.getResult("img/vol4.png"));
+            }
+            if( 0.9 > volume > 0.5) {
+                volumeVol.image  = (queue.getResult("img/vol3.png"));
+            }
+            if( 0.5 >= volume > 0) {
+                volumeVol.image  = (queue.getResult("img/vol2.png"));
+            }
+            if( volume == 0 ) {
+                volumeVol.image  = (queue.getResult("img/vol1.png"));
+            }
+
+        }
+
+        stage.addChild(difficultyText);
+
+        stage.update();
+
+
+    }
+  else  if (optionsC == true){
+        optionsButton.image = (queue.getResult("img/options.png"));
+        optionsC = false;
+        stage.removeChild(easyB);
+        stage.removeChild(normalB);
+        stage.removeChild(hardB);
+        stage.removeChild(difficultyText);
+        stage.removeChild(musicMinus);
+        stage.removeChild(musicPlus);
+        stage.removeChild(musicVol);
+        stage.removeChild(musicText);
+        stage.removeChild(volumeMinus);
+        stage.removeChild(volumePlus);
+        stage.removeChild(volumeVol);
+        stage.removeChild(volumeText);
+
+
+
+
+    }
+    helpButton.image = (queue.getResult("img/help.png"));
     stage.update();
 }
+
+function helpClick() {
+    if ( optionsC == true ){
+
+    optionsC = false;
+
+    }
+    optionsButton.image = (queue.getResult("img/options.png"));
+   if ( helpC == false ){
+       helpButton.image = (queue.getResult("img/helpC.png"));
+
+        helpSplash = new createjs.Bitmap(queue.getResult("img/helpscreen.png"));
+       helpSplash.x = 0;
+       helpSplash.y = 0;
+       stage.addChild(helpSplash);
+       helpC = true;
+   }
+  else if (helpC == true ){
+       helpButton.image = (queue.getResult("img/help.png"));
+       stage.removeChild(helpSplash);
+       helpC = false;
+   }
+    optionsButton.image =  (queue.getResult("img/options.png"));
+    stage.removeChild(easyB);
+    stage.removeChild(normalB);
+    stage.removeChild(hardB);
+    stage.removeChild(difficultyText);
+    stage.removeChild(musicMinus);
+    stage.removeChild(musicPlus);
+    stage.removeChild(musicVol);
+    stage.removeChild(musicText);
+    stage.removeChild(volumeMinus);
+    stage.removeChild(volumePlus);
+    stage.removeChild(volumeVol);
+    stage.removeChild(volumeText);
+
+    stage.update();
+}
+    function easyClick() {
+        difficultyText.text="3 Enemies spawn \n\nSlow progression \n\n10 lives";
+        easyB.image= (queue.getResult("img/easyC.png"));
+        normalB.image= (queue.getResult("img/normal.png"));
+        hardB.image= (queue.getResult("img/hard.png"));
+        difficulty =1;
+        stage.update();
+        difficultyCheck();
+    }
+    function normalClick() {
+        difficultyText.text="3 Enemies spawn \n\nNormal progression \n\n5 lives";
+        easyB.image= (queue.getResult("img/easy.png"));
+        normalB.image= (queue.getResult("img/normalC.png"));
+        hardB.image= (queue.getResult("img/hard.png"));
+        difficulty =2;
+        stage.update();
+        difficultyCheck();
+    }
+    function hardClick() {
+        easyB.image= (queue.getResult("img/easy.png"));
+        difficultyText.text="4 Enemies spawn \n\nFast progression \n\n5 lives";
+        normalB.image= (queue.getResult("img/normal.png"));
+        hardB.image= (queue.getResult("img/hardC.png"));
+        difficulty =3;
+        stage.update();
+        difficultyCheck();
+    }
+
     stage.update();
     function startClick() {
+
         startPressed();
         stage.removeChild(startButton);
         stage.removeChild(optionsButton);
         stage.removeChild(helpButton);
+        stage.removeChild(difficultyText);
+        stage.removeChild(loadText);
         stage.update();
     }
 
@@ -798,9 +1175,9 @@ function startPressed() {
         ground4.y = 345;
         ground4.alpha = 1;
         ground5.x = 0;
-        ground5.y = 000;
+        ground5.y = 0;
         ground6.x = 800;
-        ground6.y = 000;
+        ground6.y = 0;
         bigText = new createjs.Text('Swim Speed Increased :', "45px Nova Flat", "#1782ee");
         bigText.x = 150;
         bigText.y = 200;
@@ -834,11 +1211,14 @@ function tickHappened(e) {
             summonEnemy();
             summonEnemy();
             summonEnemy();
+            if (difficulty == 3){
+                summonEnemy();
+            }
             timeUntilSummon = Math.floor(Math.random() * ((390 - 90) + 1) + 90);
             timeUntilSummon /= timeUntilSummonMultiplier;
         }
         timeUntilSummonMultiplierIncrease--;
-        if (timeUntilSummonMultiplierIncrease <= 0 && timeUntilSummonMultiplier <= 5) {
+        if (timeUntilSummonMultiplierIncrease <= 0 && timeUntilSummonMultiplier <= 42) {
             timeUntilSummonMultiplier += summonMultiplierIncrease * timeUntilSummonMultiplier;
             timeUntilSummonMultiplierIncrease = 200;
         }
@@ -884,6 +1264,8 @@ function tickHappened(e) {
             }
             if (weaponDuration == 0) {
                 weaponAttack();
+
+
             }
         }
         else {
