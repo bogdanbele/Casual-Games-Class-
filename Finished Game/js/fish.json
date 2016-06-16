@@ -1,0 +1,8 @@
+{
+  "framerate": 60,
+  "images": ["img/fishmove.png"],
+  "frames": {"width":159, "height":56, "regX":0, "regY":0},
+  "animations": {
+    "one": [0,36]
+  }
+}
