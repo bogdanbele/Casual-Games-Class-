@@ -125,6 +125,7 @@
 }
 
 function gameReset() {
+    lossCheck = false;
     textFader = false;
     gameIsRunning = true;
     block = {};
@@ -694,7 +695,9 @@ function summonEnemy() {
 
             break;
         case "special":
+
             block = new createjs.Bitmap(queue.getResult("img/boxEmpty.png"));
+            block.name ="special";
             block.width = 70;
             block.height = 70;
             block.speedY = 0.6;
@@ -1257,6 +1260,8 @@ function escPressed() {
 }
 
 function startPressed() {
+    lossCheck = false;
+
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', tickHappened);
 
@@ -1264,7 +1269,7 @@ function startPressed() {
     player = new createjs.Sprite(playerSS, 'idle');
     player.width = 50;
     player.height = 70;
-
+    score = 0;
     player.x = 50;
     player.y = 540 - player.height;
     player.scaleX = 0.5;
